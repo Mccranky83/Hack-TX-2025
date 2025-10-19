@@ -297,12 +297,30 @@ export default function DesignPage() {
 
   const saveDesign = () => {
     // Mock save - in real app this would save to user's library
-    alert('Design saved to your library!');
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-6 right-6 bg-slate-900/95 backdrop-blur-sm border border-emerald-500/30 text-slate-100 px-4 py-3 rounded-xl shadow-2xl z-50 font-mono text-sm max-w-sm';
+    notification.innerHTML = `
+      <div class="flex items-center space-x-3">
+        <div class="w-2 h-2 bg-emerald-400 rounded-full"></div>
+        <span>Design saved to your library!</span>
+      </div>
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
   };
 
   const orderDesign = () => {
     // Mock order - in real app this would start checkout process
-    alert('Redirecting to checkout...');
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-6 right-6 bg-slate-900/95 backdrop-blur-sm border border-blue-500/30 text-slate-100 px-4 py-3 rounded-xl shadow-2xl z-50 font-mono text-sm max-w-sm';
+    notification.innerHTML = `
+      <div class="flex items-center space-x-3">
+        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+        <span>Redirecting to checkout...</span>
+      </div>
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
   };
 
   const resetCanvas = () => {
@@ -323,11 +341,11 @@ export default function DesignPage() {
           <div className="flex items-center space-x-4">
             <span className="text-2xl font-bold text-slate-100">Undetectable</span>
             <div className="flex space-x-2">
-              <Button onClick={saveDesign} variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-slate-100">
+              <Button onClick={saveDesign} variant="outline" className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
                 <Save className="mr-2 h-4 w-4" />
                 Save
               </Button>
-              <Button onClick={orderDesign} className="bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-mono">
+              <Button onClick={orderDesign} className="bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-mono cursor-pointer">
                 <ShoppingBag className="mr-2 h-4 w-4" />
                 Order
               </Button>
@@ -349,7 +367,7 @@ export default function DesignPage() {
                 <Button
                   key={key}
                   variant={selectedClothing === key ? "default" : "outline"}
-                  className={`w-full ${selectedClothing === key ? 'bg-emerald-400 text-slate-950' : 'border-slate-600 text-slate-300 hover:bg-slate-800'}`}
+                  className={`w-full cursor-pointer ${selectedClothing === key ? 'bg-emerald-400 text-slate-950 hover:bg-emerald-300' : 'border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-600 hover:text-slate-100 hover:border-slate-300'}`}
                   onClick={() => setSelectedClothing(key as any)}
                 >
                   {template.name}
@@ -441,7 +459,7 @@ export default function DesignPage() {
                         {/* Element Controls - Show below selected element */}
                         {selectedElement === element.id && (
                           <div 
-                            className="absolute bg-white border border-gray-300 rounded-lg p-3 shadow-lg z-10"
+                            className="absolute bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-lg z-10"
                             style={{
                               left: element.x,
                               top: element.y + element.size + 10,
@@ -450,19 +468,19 @@ export default function DesignPage() {
                           >
                             <div className="space-y-3">
                               <div className="flex items-center justify-between">
-                                <span className="text-sm font-medium">Edit Element</span>
+                                <span className="text-sm font-medium text-slate-100">Edit Element</span>
                                 <Button 
                                   onClick={() => deleteElement(element.id)}
                                   size="sm"
                                   variant="outline"
-                                  className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                                  className="border-red-500 text-red-400 bg-slate-700/50 hover:bg-red-600 hover:text-white cursor-pointer"
                                 >
                                   Delete
                                 </Button>
                               </div>
                               
                               <div>
-                                <label className="block text-xs font-medium mb-1">Size</label>
+                                <label className="block text-xs font-medium mb-1 text-slate-300">Size</label>
                                 <input
                                   type="range"
                                   min="20"
@@ -474,7 +492,7 @@ export default function DesignPage() {
                               </div>
                               
                               <div>
-                                <label className="block text-xs font-medium mb-1">Rotation</label>
+                                <label className="block text-xs font-medium mb-1 text-slate-300">Rotation</label>
                                 <input
                                   type="range"
                                   min="0"
@@ -494,15 +512,15 @@ export default function DesignPage() {
 
                   {/* Drop Zone Indicator */}
                   {isDragging && (
-                    <div className="absolute inset-0 bg-blue-100 bg-opacity-50 flex items-center justify-center">
-                      <div className="text-blue-600 font-semibold">Drop here to add element</div>
+                    <div className="absolute inset-0 bg-emerald-400/20 flex items-center justify-center">
+                      <div className="text-emerald-400 font-semibold">Drop here to add element</div>
                     </div>
                   )}
                 </div>
 
                 {/* Canvas Controls */}
                 <div className="mt-4 flex justify-center space-x-4">
-                  <Button onClick={resetCanvas} variant="outline" className="border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white">
+                  <Button onClick={resetCanvas} variant="outline" className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
                     <RotateCcw className="mr-2 h-4 w-4" />
                     Reset
                   </Button>
@@ -512,10 +530,10 @@ export default function DesignPage() {
           </div>
 
           {/* Element Library */}
-          <Card className="bg-gray-50 border-gray-200 text-gray-900">
+          <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
             <CardHeader>
-              <CardTitle>Elements</CardTitle>
-              <CardDescription>Drag to add to design</CardDescription>
+              <CardTitle className="text-slate-100">Elements</CardTitle>
+              <CardDescription className="text-slate-300">Drag to add to design</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {celestialElements.map((element) => {
@@ -525,7 +543,7 @@ export default function DesignPage() {
                     key={element.id}
                     draggable
                     onDragStart={(e) => handleDragStart(e, element.id)}
-                    className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 cursor-grab hover:bg-gray-50 transition-colors"
+                    className="flex items-center space-x-3 p-3 bg-slate-800/50 rounded-lg border border-slate-600 cursor-grab hover:bg-slate-700/50 transition-colors"
                   >
                     {element.color === '#000000' ? (
                       <PatternIcon 
@@ -536,7 +554,7 @@ export default function DesignPage() {
                     ) : (
                       <IconComponent className="w-6 h-6" style={{ color: element.color }} />
                     )}
-                    <span className="text-sm font-medium">{element.name}</span>
+                    <span className="text-sm font-medium text-slate-100">{element.name}</span>
                   </div>
                 );
               })}
@@ -547,18 +565,18 @@ export default function DesignPage() {
         {/* Test Results */}
         {testResults && (
           <div className="mt-8">
-            <Card className={`border-2 ${testResults.success ? 'border-green-500 bg-green-50' : 'border-yellow-500 bg-yellow-50'}`}>
+            <Card className={`border-2 ${testResults.success ? 'border-emerald-500 bg-emerald-900/20' : 'border-yellow-500 bg-yellow-900/20'}`}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold">
+                    <h3 className="text-lg font-semibold text-slate-100">
                       {testResults.success ? 'Design Test Passed!' : 'Design Needs Improvement'}
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-slate-300">
                       AI Confusion Score: {testResults.score}%
                     </p>
                   </div>
-                  <Badge className={testResults.success ? 'bg-green-600' : 'bg-yellow-600'}>
+                  <Badge className={testResults.success ? 'bg-emerald-600' : 'bg-yellow-600'}>
                     {testResults.success ? 'Ready to Order' : 'Needs Work'}
                   </Badge>
                 </div>
@@ -570,18 +588,18 @@ export default function DesignPage() {
 
         {/* Test & Order Section */}
         <div className="mt-8">
-          <Card className="bg-gray-50 border-gray-200 text-gray-900">
+          <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
             <CardHeader>
-              <CardTitle>Test & Order Your Design</CardTitle>
-              <CardDescription>Test your design for AI confusion effectiveness, then order your custom clothing</CardDescription>
+              <CardTitle className="text-slate-100">Test & Order Your Design</CardTitle>
+              <CardDescription className="text-slate-300">Test your design for AI confusion effectiveness, then order your custom clothing</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button onClick={testDesign} className="bg-green-600 hover:bg-green-700 text-white px-8 py-4">
+                <Button onClick={testDesign} className="bg-emerald-400 hover:bg-emerald-300 text-slate-950 px-8 py-4 cursor-pointer">
                   <TestTube className="mr-2 h-5 w-5" />
                   Test Design
                 </Button>
-                <Button onClick={orderDesign} className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4">
+                <Button onClick={orderDesign} className="bg-slate-800 hover:bg-slate-700 text-slate-100 px-8 py-4 cursor-pointer">
                   <ShoppingBag className="mr-2 h-5 w-5" />
                   Order Now
                 </Button>
@@ -592,28 +610,28 @@ export default function DesignPage() {
 
         {/* Design Stats */}
         <div className="mt-8 grid md:grid-cols-3 gap-6">
-          <Card className="bg-gray-50 border-gray-200 text-gray-900">
+          <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-gray-600 mb-2">{elements.length}</div>
-              <div className="text-gray-600">Elements Added</div>
+              <div className="text-3xl font-bold text-slate-300 mb-2">{elements.length}</div>
+              <div className="text-slate-400">Elements Added</div>
             </CardContent>
           </Card>
           
-          <Card className="bg-gray-50 border-gray-200 text-gray-900">
+          <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-gray-600 mb-2">
+              <div className="text-3xl font-bold text-slate-300 mb-2">
                 {elements.filter(el => el.type === 'star').length}
               </div>
-              <div className="text-gray-600">Stars</div>
+              <div className="text-slate-400">Stars</div>
             </CardContent>
           </Card>
           
-          <Card className="bg-gray-50 border-gray-200 text-gray-900">
+          <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-gray-600 mb-2">
+              <div className="text-3xl font-bold text-slate-300 mb-2">
                 {testResults ? testResults.score : 0}%
               </div>
-              <div className="text-gray-600">AI Confusion Score</div>
+              <div className="text-slate-400">AI Confusion Score</div>
             </CardContent>
           </Card>
         </div>
