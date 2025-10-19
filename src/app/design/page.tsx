@@ -208,6 +208,10 @@ export default function DesignPage() {
   // Load design state
   const [isLoadingDesign, setIsLoadingDesign] = useState(false);
   const [loadedDesignId, setLoadedDesignId] = useState<string | null>(null);
+  
+  // Error modal state
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const clothingTemplates = {
     shirt: { 
@@ -307,7 +311,8 @@ export default function DesignPage() {
 
   const handleSaveClick = () => {
     if (elements.length === 0) {
-      alert('Please add some elements to your design before saving!');
+      setErrorMessage('Please add some elements to your design before saving!');
+      setShowErrorModal(true);
       return;
     }
     
@@ -329,7 +334,8 @@ export default function DesignPage() {
 
   const handleSaveDesign = () => {
     if (!designName.trim()) {
-      alert('Please enter a name for your design');
+      setErrorMessage('Please enter a name for your design');
+      setShowErrorModal(true);
       return;
     }
 
@@ -938,6 +944,36 @@ export default function DesignPage() {
              >
                {redirectCountdown > 0 ? `Continue (${redirectCountdown})` : 'Continue to Dashboard'}
              </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Modal */}
+      <Dialog open={showErrorModal} onOpenChange={setShowErrorModal}>
+        <DialogContent className="sm:max-w-md bg-slate-900 border-slate-700 text-slate-100">
+          <DialogHeader>
+            <div className="mx-auto mb-4">
+              <div className="w-16 h-16 bg-yellow-900/20 border border-yellow-500/30 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+            </div>
+            <DialogTitle className="text-xl font-semibold text-center text-slate-100">
+              Attention Required
+            </DialogTitle>
+            <DialogDescription className="text-center text-slate-300">
+              {errorMessage}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <DialogFooter className="justify-center">
+            <Button 
+              onClick={() => setShowErrorModal(false)}
+              className="bg-slate-700 hover:bg-slate-600 text-slate-100 px-6 cursor-pointer"
+            >
+              Got it
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
