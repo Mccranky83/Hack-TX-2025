@@ -5,83 +5,146 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Camera, CameraOff, Play, Pause, RotateCcw } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowLeft, Wifi, WifiOff, Play, Square, AlertTriangle } from "lucide-react";
+
+interface Detection {
+  confidence: number;
+  bbox: {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  };
+}
+
+interface InferenceData {
+  detections: Detection[];
+  confidence: number;
+  fps: number;
+}
+
+interface WebSocketMessage {
+  type: 'connection' | 'frame' | 'inference';
+  data?: any;
+  message?: string;
+  timestamp: number;
+}
 
 export default function DemoPage() {
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [detectionResults, setDetectionResults] = useState<string[]>([]);
-  const [isDetecting, setIsDetecting] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [inferenceData, setInferenceData] = useState<InferenceData | null>(null);
+  const [currentFrame, setCurrentFrame] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [detectionHistory, setDetectionHistory] = useState<string[]>([]);
+  const [lastDetectionCount, setLastDetectionCount] = useState<number>(-1);
+  const wsRef = useRef<WebSocket | null>(null);
+  const videoRef = useRef<HTMLImageElement>(null);
 
-  // Mock detection results for demo
-  const mockDetectionResults = [
-    "No people detected",
-    "1 person detected",
-    "2 people detected", 
-    "3 people detected",
-    "1 person detected",
-    "No people detected"
-  ];
-
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        } 
-      });
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setIsStreaming(true);
-        startDetection();
-      }
-    } catch (error) {
-      console.error('Camera access denied:', error);
-    }
-  };
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    setIsStreaming(false);
-    setIsDetecting(false);
-    setDetectionResults([]);
-  };
-
-  const startDetection = () => {
-    setIsDetecting(true);
-    let resultIndex = 0;
+  // WebSocket connection management
+  const connectToStream = async () => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) return;
     
-    const detectionInterval = setInterval(() => {
-      if (!isDetecting) {
-        clearInterval(detectionInterval);
-        return;
-      }
+    setIsConnecting(true);
+    setConnectionError(null);
+    
+    try {
+      const ws = new WebSocket('ws://localhost:8080/ws');
+      wsRef.current = ws;
       
-      setDetectionResults(prev => [...prev, mockDetectionResults[resultIndex]]);
-      resultIndex = (resultIndex + 1) % mockDetectionResults.length;
-    }, 2000);
+      ws.onopen = () => {
+        console.log('Connected to WebRTC server');
+        setIsConnected(true);
+        setIsConnecting(false);
+        setConnectionError(null);
+      };
+      
+      ws.onmessage = (event) => {
+        try {
+          const message: WebSocketMessage = JSON.parse(event.data);
+          handleWebSocketMessage(message);
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+      
+      ws.onclose = () => {
+        console.log('WebSocket connection closed');
+        setIsConnected(false);
+        setIsConnecting(false);
+        wsRef.current = null;
+      };
+      
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setConnectionError('Failed to connect to live stream server');
+        setIsConnecting(false);
+        setIsConnected(false);
+      };
+    } catch (error) {
+      console.error('Connection error:', error);
+      setConnectionError('Failed to connect to live stream server');
+      setIsConnecting(false);
+    }
   };
 
-  const stopDetection = () => {
-    setIsDetecting(false);
+  const disconnectFromStream = () => {
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+    setIsConnected(false);
+    setInferenceData(null);
+    setCurrentFrame(null);
+  };
+
+  const handleWebSocketMessage = (message: WebSocketMessage) => {
+    switch (message.type) {
+      case 'connection':
+        console.log('Connection message:', message.message);
+        break;
+        
+      case 'inference':
+        setInferenceData(message.data);
+        // Only add to detection history when detection count changes significantly
+        const detectionCount = message.data.detections.length;
+        if (detectionCount !== lastDetectionCount) {
+          const now = new Date();
+          const timeString = now.toLocaleTimeString();
+          const detectionText = detectionCount === 0 ? "No people detected" : 
+                               detectionCount === 1 ? "1 person detected" : 
+                               `${detectionCount} people detected`;
+          const historyEntry = `${timeString}: ${detectionText}`;
+          setDetectionHistory(prev => [...prev.slice(-9), historyEntry]); // Keep last 10
+          setLastDetectionCount(detectionCount);
+        }
+        break;
+        
+      case 'frame':
+        if (message.data?.frame) {
+          setCurrentFrame(`data:image/jpeg;base64,${message.data.frame}`);
+        }
+        break;
+    }
   };
 
   const resetDemo = () => {
-    setDetectionResults([]);
-    if (isStreaming) {
-      stopCamera();
+    setDetectionHistory([]);
+    setLastDetectionCount(-1);
+    if (isConnected) {
+      disconnectFromStream();
     }
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -109,85 +172,136 @@ export default function DemoPage() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Camera Feed */}
+          {/* Live Stream Feed */}
           <Card className="bg-gray-50 border-gray-200 text-gray-900">
             <CardHeader>
-              <CardTitle className="text-2xl">Live Camera Feed</CardTitle>
+              <CardTitle className="text-2xl">Live Stream Feed</CardTitle>
               <CardDescription>
-                Your camera feed with real-time AI detection overlay
+                Real-time video stream with AI detection overlay
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Connection Status */}
+              <div className="flex items-center justify-between p-4 rounded-lg bg-gray-100 mb-4">
+                <div className="flex items-center space-x-3">
+                  {isConnected ? (
+                    <Wifi className="h-5 w-5 text-green-500" />
+                  ) : (
+                    <WifiOff className="h-5 w-5 text-red-500" />
+                  )}
+                  <span className={isConnected ? "text-green-600" : "text-red-600"}>
+                    {isConnected ? "Connected" : "Disconnected"}
+                  </span>
+                </div>
+              </div>
+
               <div className="relative">
                 <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
-                  {isStreaming ? (
-                    <video
+                  {currentFrame ? (
+                    <img
                       ref={videoRef}
-                      autoPlay
-                      playsInline
+                      src={currentFrame}
+                      alt="Live stream"
                       className="w-full h-full object-cover"
                     />
+                  ) : isConnected ? (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400 mx-auto mb-2"></div>
+                        <p className="text-gray-500">Waiting for video stream...</p>
+                      </div>
+                    </div>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="text-center">
-                        <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-500">Camera feed will appear here</p>
+                        <WifiOff className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500">Connect to start live stream</p>
                       </div>
                     </div>
                   )}
                 </div>
                 
                 {/* Detection Overlay */}
-                {isStreaming && (
+                {isConnected && inferenceData && (
                   <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-2 rounded-lg">
                     <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-mono">AI Detection Active</span>
+                      <div className={`w-2 h-2 rounded-full animate-pulse ${
+                        inferenceData.detections.length > 0 ? 'bg-red-500' : 'bg-green-500'
+                      }`}></div>
+                      <span className="text-sm font-mono">
+                        {inferenceData.detections.length > 0 ? 'AI Detection Active' : 'No Detection'}
+                      </span>
                     </div>
+                  </div>
+                )}
+
+                {/* Detection Count Badge */}
+                {isConnected && inferenceData && inferenceData.detections.length > 0 && (
+                  <div className="absolute top-4 right-4">
+                    <Badge className="bg-red-600 text-white">
+                      {inferenceData.detections.length} Detection{inferenceData.detections.length !== 1 ? 's' : ''}
+                    </Badge>
                   </div>
                 )}
               </div>
 
-              {/* Camera Controls */}
+              {/* Connection Controls */}
               <div className="mt-6 flex justify-center space-x-4">
-                {!isStreaming ? (
-                  <Button onClick={startCamera} className="bg-gray-900 hover:bg-gray-800 text-white">
-                    <Camera className="mr-2 h-4 w-4" />
-                    Start Camera
+                {!isConnected ? (
+                  <Button 
+                    onClick={connectToStream} 
+                    className="bg-gray-900 hover:bg-gray-800 text-white"
+                    disabled={isConnecting}
+                  >
+                    {isConnecting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Connecting...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="mr-2 h-4 w-4" />
+                        Connect to Stream
+                      </>
+                    )}
                   </Button>
                 ) : (
-                  <>
-                    <Button onClick={stopCamera} variant="outline" className="border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white">
-                      <CameraOff className="mr-2 h-4 w-4" />
-                      Stop Camera
-                    </Button>
-                    {!isDetecting ? (
-                      <Button onClick={startDetection} className="bg-green-600 hover:bg-green-700 text-white">
-                        <Play className="mr-2 h-4 w-4" />
-                        Start Detection
-                      </Button>
-                    ) : (
-                      <Button onClick={stopDetection} variant="outline" className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white">
-                        <Pause className="mr-2 h-4 w-4" />
-                        Stop Detection
-                      </Button>
-                    )}
-                  </>
+                  <Button 
+                    onClick={disconnectFromStream} 
+                    variant="outline" 
+                    className="border-red-500 text-red-600 hover:bg-red-500 hover:text-white"
+                  >
+                    <Square className="mr-2 h-4 w-4" />
+                    Disconnect
+                  </Button>
                 )}
-                <Button onClick={resetDemo} variant="outline" className="border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white">
-                  <RotateCcw className="mr-2 h-4 w-4" />
+                <Button 
+                  onClick={resetDemo} 
+                  variant="outline" 
+                  className="border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white"
+                >
                   Reset
                 </Button>
               </div>
+
+              {/* Error Display */}
+              {connectionError && (
+                <Alert className="mt-4 border-red-600 bg-red-50">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    {connectionError}
+                  </AlertDescription>
+                </Alert>
+              )}
             </CardContent>
           </Card>
 
           {/* Detection Results */}
           <Card className="bg-gray-50 border-gray-200 text-gray-900">
             <CardHeader>
-              <CardTitle className="text-2xl">Detection Results</CardTitle>
+              <CardTitle className="text-2xl">Live Detection Results</CardTitle>
               <CardDescription>
-                Real-time AI detection output showing what the system sees
+                Real-time AI detection output from the live stream
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -196,50 +310,102 @@ export default function DemoPage() {
                 <div className="bg-gray-100 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold">Current Status:</span>
-                    <Badge className={isDetecting ? "bg-red-600" : "bg-gray-600"}>
-                      {isDetecting ? "Detecting" : "Idle"}
+                    <Badge className={isConnected ? "bg-green-600" : "bg-gray-600"}>
+                      {isConnected ? "Live" : "Disconnected"}
                     </Badge>
                   </div>
                   <p className="text-sm text-gray-600">
-                    {isDetecting 
-                      ? "AI is actively analyzing the camera feed for human detection"
-                      : "Start detection to see real-time results"
+                    {isConnected 
+                      ? "Receiving real-time detection data from the live stream"
+                      : "Connect to live stream to see real-time results"
                     }
                   </p>
                 </div>
 
-                {/* Detection History */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold">Detection History:</h3>
-                  <div className="max-h-64 overflow-y-auto space-y-2">
-                    {detectionResults.length === 0 ? (
-                      <p className="text-gray-500 text-sm">No detection results yet</p>
-                    ) : (
-                      detectionResults.map((result, index) => (
-                        <div key={index} className="flex items-center justify-between bg-white rounded-lg p-3 border border-gray-200">
-                          <span className="text-sm font-mono">{result}</span>
-                          <Badge className={
-                            result.includes("No people") ? "bg-green-600" :
-                            result.includes("1 person") ? "bg-yellow-600" :
-                            "bg-red-600"
-                          }>
-                            {result.includes("No people") ? "Success" :
-                             result.includes("1 person") ? "Partial" : "Detected"}
-                          </Badge>
-                        </div>
-                      ))
-                    )}
+                {/* Performance Metrics */}
+                {inferenceData && (
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="bg-white rounded-lg p-4 text-center border border-gray-200">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {(inferenceData.confidence * 100).toFixed(1)}%
+                      </div>
+                      <div className="text-sm text-gray-600">Detection Confidence</div>
+                    </div>
                   </div>
+                )}
+
+                {/* Current Detection Status */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Current Status:</h3>
+                  
+                  {inferenceData ? (
+                    <div className="space-y-4">
+                      {/* Main Status Indicator */}
+                      <div className={`rounded-lg p-6 text-center ${
+                        inferenceData.detections.length === 0 
+                          ? 'bg-green-50 border-2 border-green-200' 
+                          : inferenceData.detections.length === 1 
+                          ? 'bg-yellow-50 border-2 border-yellow-200'
+                          : 'bg-red-50 border-2 border-red-200'
+                      }`}>
+                        <div className="text-4xl mb-2">
+                          {inferenceData.detections.length === 0 ? '✅' : 
+                           inferenceData.detections.length === 1 ? '⚠️' : '❌'}
+                        </div>
+                        <div className="text-xl font-bold mb-1">
+                          {inferenceData.detections.length === 0 ? 'INVISIBLE' : 
+                           inferenceData.detections.length === 1 ? 'PARTIALLY DETECTED' : 'FULLY DETECTED'}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {inferenceData.detections.length === 0 ? 'Your privacy clothing is working perfectly!' : 
+                           inferenceData.detections.length === 1 ? 'AI is having trouble identifying you clearly' : 
+                           'AI can clearly see and identify you'}
+                        </div>
+                      </div>
+
+                      {/* Confidence Meter */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Detection Confidence</span>
+                          <span className="font-mono">{(inferenceData.confidence * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                          <div 
+                            className={`h-3 rounded-full transition-all duration-300 ${
+                              inferenceData.confidence < 0.3 ? 'bg-green-500' :
+                              inferenceData.confidence < 0.7 ? 'bg-yellow-500' : 'bg-red-500'
+                            }`}
+                            style={{ width: `${inferenceData.confidence * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Recent Changes Indicator */}
+                      {detectionHistory.length > 0 && (
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <div className="text-sm font-medium text-gray-700 mb-2">Recent Change:</div>
+                          <div className="text-sm text-gray-600">
+                            {detectionHistory[detectionHistory.length - 1]}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <div className="text-4xl mb-2">📡</div>
+                      <p>Connect to live stream to see detection status</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Instructions */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <h4 className="font-semibold text-blue-900 mb-2">How to Test:</h4>
                   <ol className="text-sm text-blue-800 space-y-1">
-                    <li>1. Start your camera</li>
+                    <li>1. Connect to the live stream</li>
                     <li>2. Put on your AI-confusing clothing</li>
-                    <li>3. Start detection to see results</li>
-                    <li>4. Watch for "No people detected" for success</li>
+                    <li>3. Watch the real-time detection results</li>
+                    <li>4. Look for "No people detected" for success</li>
                   </ol>
                 </div>
               </div>
@@ -247,37 +413,6 @@ export default function DemoPage() {
           </Card>
         </div>
 
-        {/* Demo Stats */}
-        <div className="mt-12 grid md:grid-cols-3 gap-6">
-          <Card className="bg-gray-50 border-gray-200 text-gray-900">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-gray-600 mb-2">
-                {detectionResults.filter(r => r.includes("No people")).length}
-              </div>
-              <div className="text-gray-600">Successful Undetections</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gray-50 border-gray-200 text-gray-900">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-gray-600 mb-2">
-                {detectionResults.length}
-              </div>
-              <div className="text-gray-600">Total Detections</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gray-50 border-gray-200 text-gray-900">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-gray-600 mb-2">
-                {detectionResults.length > 0 
-                  ? Math.round((detectionResults.filter(r => r.includes("No people")).length / detectionResults.length) * 100)
-                  : 0}%
-              </div>
-              <div className="text-gray-600">Success Rate</div>
-            </CardContent>
-          </Card>
-        </div>
       </main>
     </div>
   );
