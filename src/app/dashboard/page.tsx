@@ -12,12 +12,10 @@ export default function DashboardPage() {
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
-            <ArrowLeft className="h-5 w-5" />
-            <span>Back to Home</span>
-          </Link>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-gray-900">Undetectable</span>
+          </div>
+          <div className="flex items-center space-x-4">
             <Button variant="outline" className="text-gray-900 border-gray-900 hover:bg-gray-900 hover:text-white">
               <Settings className="mr-2 h-4 w-4" />
               Settings
@@ -30,81 +28,109 @@ export default function DashboardPage() {
         {/* Welcome Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-            Your <span className="text-red-600">AI-Confusing</span> Dashboard
+            Your <span className="text-gray-700">Undetectable</span> Dashboard
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Create, test, and manage your personal AI-confusing patterns
+            Test your patterns and create custom AI-confusing designs
           </p>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        {/* Main Features */}
+        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+          {/* Test/Demo Your Shirt */}
+          <Link href="/demo">
+            <Card className="bg-gray-50 border-gray-200 text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer h-full">
+              <CardHeader className="text-center">
+                <div className="w-20 h-20 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <TestTube className="h-10 w-10 text-white" />
+                </div>
+                <CardTitle className="text-2xl">Test/Demo Your Shirt</CardTitle>
+                <CardDescription className="text-lg">
+                  See computer vision in action with live camera detection
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center text-gray-600">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full mr-3"></span>
+                    Live camera feed with real-time detection
+                  </div>
+                  <div className="flex items-center text-gray-600">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full mr-3"></span>
+                    See detection results: "1 person detected", "2 people detected"
+                  </div>
+                  <div className="flex items-center text-gray-600">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full mr-3"></span>
+                    Test your existing clothing patterns
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Custom Designs */}
           <Link href="/design">
-            <Card className="bg-gray-50 border-gray-200 text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer">
-              <CardHeader>
-                <Palette className="h-12 w-12 text-red-600 mb-4" />
-                <CardTitle>Create Pattern</CardTitle>
-                <CardDescription>
-                  Design your own AI-confusing pattern or choose from templates
+            <Card className="bg-gray-50 border-gray-200 text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer h-full">
+              <CardHeader className="text-center">
+                <div className="w-20 h-20 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Palette className="h-10 w-10 text-white" />
+                </div>
+                <CardTitle className="text-2xl">Custom Designs</CardTitle>
+                <CardDescription className="text-lg">
+                  Create your own AI-confusing patterns with celestial elements
                 </CardDescription>
               </CardHeader>
-            </Card>
-          </Link>
-
-          <Link href="/test">
-            <Card className="bg-gray-50 border-gray-200 text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer">
-              <CardHeader>
-                <TestTube className="h-12 w-12 text-red-600 mb-4" />
-                <CardTitle>Test Detection</CardTitle>
-                <CardDescription>
-                  Upload an image to test how well your pattern confuses AI
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-
-          <Link href="/shop">
-            <Card className="bg-gray-50 border-gray-200 text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer">
-              <CardHeader>
-                <ShoppingBag className="h-12 w-12 text-red-600 mb-4" />
-                <CardTitle>Order Clothing</CardTitle>
-                <CardDescription>
-                  Get your custom pattern printed on shirts, hoodies, and more
-                </CardDescription>
-              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center text-gray-600">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full mr-3"></span>
+                    Drag & drop design elements (stars, moons, suns, circles)
+                  </div>
+                  <div className="flex items-center text-gray-600">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full mr-3"></span>
+                    Test your design for undetection effectiveness
+                  </div>
+                  <div className="flex items-center text-gray-600">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full mr-3"></span>
+                    Order custom clothing with your design
+                  </div>
+                </div>
+              </CardContent>
             </Card>
           </Link>
         </div>
 
-        {/* My Patterns Section */}
+        {/* Saved Designs Section */}
         <div className="mb-12">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold text-gray-900">My Patterns</h2>
-            <Button className="bg-red-600 hover:bg-red-700 text-white">
-              <Palette className="mr-2 h-4 w-4" />
-              Create New
-            </Button>
+            <h2 className="text-3xl font-bold text-gray-900">Saved Designs</h2>
+            <Link href="/design">
+              <Button className="bg-gray-900 hover:bg-gray-800 text-white">
+                <Palette className="mr-2 h-4 w-4" />
+                Create New Design
+              </Button>
+            </Link>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Sample Pattern Cards */}
+            {/* Sample Saved Design Cards */}
             <Card className="bg-gray-50 border-gray-200 text-gray-900">
               <CardHeader>
                 <div className="aspect-square bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
-                  <span className="text-gray-500 text-sm">Pattern Preview</span>
+                  <span className="text-gray-500 text-sm">Design Preview</span>
                 </div>
-                <CardTitle>Geometric Disruptor</CardTitle>
-                <CardDescription>Basic pattern - 65% AI confusion rate</CardDescription>
+                <CardTitle>Celestial Stars</CardTitle>
+                <CardDescription>Custom design with star patterns</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex justify-between items-center">
-                  <Badge className="bg-green-600">Basic</Badge>
+                  <Badge className="bg-green-600">Tested & Ready</Badge>
                   <div className="flex space-x-2">
                     <Button size="sm" variant="outline">
-                      <Download className="h-4 w-4" />
+                      <TestTube className="h-4 w-4" />
                     </Button>
                     <Button size="sm" variant="outline">
-                      <TestTube className="h-4 w-4" />
+                      <ShoppingBag className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -114,20 +140,20 @@ export default function DashboardPage() {
             <Card className="bg-gray-50 border-gray-200 text-gray-900">
               <CardHeader>
                 <div className="aspect-square bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
-                  <span className="text-gray-500 text-sm">Pattern Preview</span>
+                  <span className="text-gray-500 text-sm">Design Preview</span>
                 </div>
-                <CardTitle>Noise Generator</CardTitle>
-                <CardDescription>Advanced pattern - 82% AI confusion rate</CardDescription>
+                <CardTitle>Moon Phases</CardTitle>
+                <CardDescription>Lunar pattern design</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex justify-between items-center">
-                  <Badge className="bg-yellow-600">Advanced</Badge>
+                  <Badge className="bg-yellow-600">Needs Testing</Badge>
                   <div className="flex space-x-2">
                     <Button size="sm" variant="outline">
-                      <Download className="h-4 w-4" />
+                      <TestTube className="h-4 w-4" />
                     </Button>
                     <Button size="sm" variant="outline">
-                      <TestTube className="h-4 w-4" />
+                      <ShoppingBag className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -137,79 +163,47 @@ export default function DashboardPage() {
             <Card className="bg-gray-50 border-gray-200 text-gray-900">
               <CardHeader>
                 <div className="aspect-square bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
-                  <span className="text-gray-500 text-sm">Pattern Preview</span>
+                  <span className="text-gray-500 text-sm">Design Preview</span>
                 </div>
-                <CardTitle>AI Breaker</CardTitle>
-                <CardDescription>Maximum pattern - 94% AI confusion rate</CardDescription>
+                <CardTitle>Solar Eclipse</CardTitle>
+                <CardDescription>Sun and moon combination</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex justify-between items-center">
-                  <Badge className="bg-red-600">Maximum</Badge>
+                  <Badge className="bg-green-600">Tested & Ready</Badge>
                   <div className="flex space-x-2">
                     <Button size="sm" variant="outline">
-                      <Download className="h-4 w-4" />
+                      <TestTube className="h-4 w-4" />
                     </Button>
                     <Button size="sm" variant="outline">
-                      <TestTube className="h-4 w-4" />
+                      <ShoppingBag className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-        </div>
-
-        {/* Recent Tests */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">Recent Tests</h2>
-          <Card className="bg-gray-50 border-gray-200 text-gray-900">
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-semibold">Geometric Disruptor Test</h3>
-                    <p className="text-sm text-gray-600">Uploaded 2 hours ago</p>
-                  </div>
-                  <Badge className="bg-green-600">PASSED - 15% detected</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-semibold">Noise Generator Test</h3>
-                    <p className="text-sm text-gray-600">Uploaded 1 day ago</p>
-                  </div>
-                  <Badge className="bg-green-600">PASSED - 8% detected</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-semibold">Basic Pattern Test</h3>
-                    <p className="text-sm text-gray-600">Uploaded 3 days ago</p>
-                  </div>
-                  <Badge className="bg-yellow-600">PARTIAL - 35% detected</Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Quick Stats */}
         <div className="grid md:grid-cols-3 gap-6">
           <Card className="bg-gray-50 border-gray-200 text-gray-900">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-red-600 mb-2">12</div>
-              <div className="text-gray-600">Patterns Created</div>
+              <div className="text-3xl font-bold text-gray-600 mb-2">5</div>
+              <div className="text-gray-600">Designs Created</div>
             </CardContent>
           </Card>
           
           <Card className="bg-gray-50 border-gray-200 text-gray-900">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">8</div>
-              <div className="text-gray-600">Successful Tests</div>
+              <div className="text-3xl font-bold text-green-600 mb-2">3</div>
+              <div className="text-gray-600">Tested & Ready</div>
             </CardContent>
           </Card>
           
           <Card className="bg-gray-50 border-gray-200 text-gray-900">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">3</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">2</div>
               <div className="text-gray-600">Orders Placed</div>
             </CardContent>
           </Card>
