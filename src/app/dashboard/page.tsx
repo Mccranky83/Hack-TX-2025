@@ -16,10 +16,12 @@ export default function DashboardPage() {
             <span className="text-2xl font-bold text-gray-900">Undetectable</span>
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="outline" className="text-gray-900 border-gray-900 hover:bg-gray-900 hover:text-white">
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
-            </Button>
+            <Link href="/settings">
+              <Button variant="outline" className="text-gray-900 border-gray-900 hover:bg-gray-900 hover:text-white">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>
