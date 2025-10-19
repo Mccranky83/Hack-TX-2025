@@ -174,14 +174,14 @@ const PatternIcon = ({ type, size = 24, className }: { type: string; size?: numb
     };
   }, [type, size]);
 
-  return (
+  return imageSrc ? (
     <img 
       src={imageSrc} 
       alt={type}
       className={className}
       style={{ width: size, height: size }}
     />
-  );
+  ) : null;
 };
 
 
