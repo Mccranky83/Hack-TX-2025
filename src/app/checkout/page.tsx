@@ -148,7 +148,7 @@ export default function CheckoutPage() {
                   Back to Dashboard
                 </Button>
               </Link>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-slate-400 mt-6">
                 You will receive an email confirmation shortly.
               </p>
             </div>
@@ -292,7 +292,7 @@ export default function CheckoutPage() {
                   {!showPaymentForm ? (
                     <Button
                       onClick={handlePaymentClick}
-                      className="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-semibold h-12"
+                      className="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-semibold h-12 cursor-pointer"
                     >
                       <div className="flex items-center space-x-2">
                         <CreditCard className="h-5 w-5" />
@@ -517,7 +517,7 @@ export default function CheckoutPage() {
                       <Button
                         type="submit"
                         disabled={isProcessing}
-                        className="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-semibold h-12"
+                        className="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-semibold h-12 cursor-pointer"
                       >
                         {isProcessing ? (
                           <div className="flex items-center space-x-2">

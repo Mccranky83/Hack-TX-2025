@@ -161,7 +161,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 <div className="space-y-2">
                   <Button
                     onClick={handleCheckout}
-                    className="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-semibold"
+                    className="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-semibold cursor-pointer"
                   >
                     Proceed to Checkout
                   </Button>
