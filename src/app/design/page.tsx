@@ -802,12 +802,12 @@ export default function DesignPage() {
 
       {/* Save Design Modal */}
       <Dialog open={showSaveModal} onOpenChange={setShowSaveModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-slate-900 border-slate-700 text-slate-100">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-slate-100">
               {loadedDesignId ? 'Update Design' : 'Save Design'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-slate-300">
               {loadedDesignId 
                 ? 'Update your design name and description, then save the changes.'
                 : 'Give your design a name and description to save it to your library.'
@@ -817,33 +817,33 @@ export default function DesignPage() {
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="design-name">Design Name *</Label>
+              <Label htmlFor="design-name" className="text-slate-100">Design Name *</Label>
               <Input
                 id="design-name"
                 placeholder="Enter design name..."
                 value={designName}
                 onChange={(e) => setDesignName(e.target.value)}
-                className="w-full"
+                className="w-full bg-slate-800 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-emerald-400"
                 autoFocus
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="design-description">Description (Optional)</Label>
+              <Label htmlFor="design-description" className="text-slate-100">Description (Optional)</Label>
               <Input
                 id="design-description"
                 placeholder="Enter design description..."
                 value={designDescription}
                 onChange={(e) => setDesignDescription(e.target.value)}
-                className="w-full"
+                className="w-full bg-slate-800 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-emerald-400"
               />
             </div>
             
-            <div className="text-sm text-gray-600">
-              <p><strong>Clothing Type:</strong> {selectedClothing === 'shirt' ? 'T-Shirt' : 'Hoodie'}</p>
-              <p><strong>Elements:</strong> {elements.length} design element{elements.length !== 1 ? 's' : ''}</p>
+            <div className="text-sm text-slate-400">
+              <p><strong className="text-slate-300">Clothing Type:</strong> {selectedClothing === 'shirt' ? 'T-Shirt' : 'Hoodie'}</p>
+              <p><strong className="text-slate-300">Elements:</strong> {elements.length} design element{elements.length !== 1 ? 's' : ''}</p>
               {testResults && (
-                <p><strong>Test Score:</strong> {testResults.score}%</p>
+                <p><strong className="text-slate-300">Test Score:</strong> {testResults.score}%</p>
               )}
             </div>
           </div>
@@ -852,14 +852,14 @@ export default function DesignPage() {
             <Button 
               variant="outline" 
               onClick={handleCancelSave}
-              className="mr-2 cursor-pointer"
+              className="mr-2 cursor-pointer border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleSaveDesign}
               disabled={!designName.trim()}
-              className="bg-gray-900 hover:bg-gray-800 text-white cursor-pointer"
+              className="bg-emerald-400 hover:bg-emerald-300 text-slate-950 cursor-pointer disabled:bg-slate-600 disabled:text-slate-400"
             >
               <Save className="mr-2 h-4 w-4" />
               {loadedDesignId ? 'Update Design' : 'Save Design'}
@@ -870,71 +870,73 @@ export default function DesignPage() {
 
       {/* Success Modal */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="sm:max-w-md text-center">
+        <DialogContent className="sm:max-w-md bg-slate-900 border-slate-700 text-slate-100">
           <DialogHeader>
-            <div className="mx-auto mb-4">
-              {/* Success Animation */}
-              <div className="relative">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto animate-pulse">
-                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
-                    <svg 
-                      className="w-8 h-8 text-white" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={3} 
-                        d="M5 13l4 4L19 7" 
-                      />
-                    </svg>
-                  </div>
-                </div>
-                {/* Confetti Animation */}
-                <div className="absolute -top-2 -left-2 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
-                <div className="absolute -top-1 -right-3 w-3 h-3 bg-pink-400 rounded-full animate-ping" style={{animationDelay: '0.2s'}}></div>
-                <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-blue-400 rounded-full animate-ping" style={{animationDelay: '0.4s'}}></div>
-                <div className="absolute -bottom-2 -right-2 w-3 h-3 bg-purple-400 rounded-full animate-ping" style={{animationDelay: '0.6s'}}></div>
+            <div className="mx-auto mb-6">
+              {/* Professional Success Icon */}
+              <div className="w-16 h-16 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto">
+                <svg 
+                  className="w-8 h-8 text-emerald-400" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M5 13l4 4L19 7" 
+                  />
+                </svg>
               </div>
             </div>
-            <DialogTitle className="text-2xl font-bold text-green-600">
-              🎉 Congratulations! 🎉
+            <DialogTitle className="text-xl font-semibold text-slate-100 text-center">
+              Design Saved Successfully
             </DialogTitle>
-            <DialogDescription className="text-lg text-gray-700">
-              Your design <strong>"{savedDesignName}"</strong> has been successfully saved to your library!
+            <DialogDescription className="text-slate-300 text-center">
+              Your design <span className="font-medium text-slate-100">"{savedDesignName}"</span> has been added to your library.
             </DialogDescription>
           </DialogHeader>
           
           <div className="py-4">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-              <div className="flex items-center justify-center space-x-2 text-green-700">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className="font-medium">Design saved successfully!</span>
+            <div className="bg-slate-800/50 border border-slate-600 rounded-lg p-4 mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                <span className="text-sm text-slate-300">Design is now available in your dashboard</span>
               </div>
             </div>
             
-             <div className="text-sm text-gray-600 space-y-1">
-               <p>✨ Your design is now available in your dashboard</p>
-               <p>🎨 You can view, edit, or order it anytime</p>
-               <p>🚀 Ready to create more AI-confusing patterns!</p>
-               <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
-                 <p className="text-blue-700 font-medium">
-                   Redirecting to dashboard in {redirectCountdown} second{redirectCountdown !== 1 ? 's' : ''}...
-                 </p>
-               </div>
-             </div>
+            <div className="space-y-3 text-sm text-slate-400">
+              <div className="flex items-center space-x-3">
+                <div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div>
+                <span>View and manage your design collection</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div>
+                <span>Test your design for AI confusion effectiveness</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div>
+                <span>Order custom clothing with your design</span>
+              </div>
+            </div>
+            
+            <div className="mt-4 p-3 bg-slate-800/30 border border-slate-700 rounded-lg">
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                <span className="text-slate-300 text-sm">
+                  Redirecting to dashboard in {redirectCountdown} second{redirectCountdown !== 1 ? 's' : ''}...
+                </span>
+              </div>
+            </div>
           </div>
           
           <DialogFooter className="justify-center">
              <Button 
                onClick={handleCloseSuccess}
-               className="bg-green-600 hover:bg-green-700 text-white px-8 py-2 cursor-pointer"
+               className="bg-emerald-400 hover:bg-emerald-300 text-slate-950 px-6 py-2 cursor-pointer"
              >
-               {redirectCountdown > 0 ? `Continue (${redirectCountdown})` : 'Continue Now'}
+               {redirectCountdown > 0 ? `Continue (${redirectCountdown})` : 'Continue to Dashboard'}
              </Button>
           </DialogFooter>
         </DialogContent>
