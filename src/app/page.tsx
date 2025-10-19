@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,21 +30,28 @@ export default function Home() {
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
             Be Invisible to <span className="text-gray-700">AI</span>
           </h1>
+          
+          {/* Logo Image */}
+          <div className="flex justify-center mb-8">
+            <Image
+              src="/picture1.png"
+              alt="Undetectable Logo"
+              width={200}
+              height={200}
+              className="object-contain"
+              priority
+            />
+          </div>
+          
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
             Revolutionary clothing patterns that confuse computer vision algorithms. 
             Make yourself invisible to AI surveillance through strategic design.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Link href="/signin">
               <Button size="lg" className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 text-lg">
                 <Zap className="mr-2 h-5 w-5" />
                 Get Started
-              </Button>
-            </Link>
-            <Link href="/test">
-              <Button size="lg" variant="outline" className="border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white px-8 py-4 text-lg">
-                <TestTube className="mr-2 h-5 w-5" />
-                Test Detection
               </Button>
             </Link>
           </div>
@@ -150,18 +158,13 @@ export default function Home() {
         <div className="text-center bg-gray-100 rounded-2xl p-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Fight Back Against AI Surveillance</h2>
           <p className="text-gray-600 mb-8">Join the resistance. Take back your autonomy from algorithmic control and corporate surveillance. Your face, your choice.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signin">
-              <Button size="lg" className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4">
-                Get Started
-              </Button>
-            </Link>
-            <Link href="/test">
-              <Button size="lg" variant="outline" className="border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white px-8 py-4">
-                Test Detection
-              </Button>
-            </Link>
-          </div>
+           <div className="flex justify-center">
+             <Link href="/signin">
+               <Button size="lg" className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4">
+                 Get Started
+               </Button>
+             </Link>
+           </div>
         </div>
       </main>
 

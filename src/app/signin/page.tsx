@@ -102,12 +102,6 @@ export default function SignInPage() {
               </p>
             </div>
 
-            {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-gray-200 rounded-lg">
-              <p className="text-sm text-gray-700 mb-2">Demo Credentials:</p>
-              <p className="text-xs text-gray-600">Email: demo@undetectable.com</p>
-              <p className="text-xs text-gray-600">Password: demo123</p>
-            </div>
           </CardContent>
         </Card>
 
