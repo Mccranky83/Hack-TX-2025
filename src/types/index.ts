@@ -67,6 +67,7 @@ export interface MockDetectResult {
   }>;
   timestamp: number;
   imageUrl?: string;
+  annotatedImage?: string;
 }
 
 export interface DetectionTest {

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowLeft, Star, Sun, Moon, Circle, RotateCcw, Save, ShoppingBag, TestTube, Palette, X } from "lucide-react";
 import { SavedDesign, DesignElement } from "@/types";
+// html2canvas will be imported dynamically
 
 // Custom Saturn component
 const Saturn = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
@@ -193,7 +194,16 @@ export default function DesignPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragElement, setDragElement] = useState<string | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const [testResults, setTestResults] = useState<{ success: boolean; score: number } | null>(null);
+  const [testResults, setTestResults] = useState<{ 
+    success: boolean; 
+    score: number;
+    detectionCount?: number;
+    confidence?: number;
+    detections?: any[];
+    annotatedImage?: string;
+    generatedImage?: string;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Save modal state
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -300,13 +310,194 @@ export default function DesignPage() {
     setSelectedElement(null);
   };
 
-  const testDesign = () => {
-    // Mock testing - in real app this would call your API
-    const score = Math.random() * 40 + 60; // 60-100% success rate
-    setTestResults({
-      success: score > 80,
-      score: Math.round(score)
-    });
+  // Canvas drawing functions for screenshot generation
+  const drawStarOnCanvas = (ctx: CanvasRenderingContext2D, cx: number, cy: number, radius: number) => {
+    const spikes = 5;
+    const outerRadius = radius;
+    const innerRadius = radius * 0.4;
+    
+    ctx.beginPath();
+    for (let i = 0; i < spikes * 2; i++) {
+      const angle = (i * Math.PI) / spikes;
+      const r = i % 2 === 0 ? outerRadius : innerRadius;
+      const x = cx + Math.cos(angle) * r;
+      const y = cy + Math.sin(angle) * r;
+      
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    ctx.closePath();
+    ctx.fill();
+  };
+
+  const drawSaturnOnCanvas = (ctx: CanvasRenderingContext2D, cx: number, cy: number, radius: number) => {
+    // Draw planet
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 0.6, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Draw rings
+    ctx.strokeStyle = ctx.fillStyle;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, radius * 0.8, radius * 0.3, 0, 0, 2 * Math.PI);
+    ctx.stroke();
+  };
+
+  const drawMoonOnCanvas = (ctx: CanvasRenderingContext2D, cx: number, cy: number, radius: number) => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Add crescent effect
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(cx - radius * 0.3, cy, radius * 0.8, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  };
+
+  const drawCircleOnCanvas = (ctx: CanvasRenderingContext2D, cx: number, cy: number, radius: number) => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+    ctx.fill();
+  };
+
+  const testDesign = async () => {
+    if (elements.length === 0) {
+      setErrorMessage('Please add some elements to your design before testing!');
+      setShowErrorModal(true);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Capture screenshot of the design canvas
+      if (!canvasRef.current) {
+        throw new Error('Design canvas not found');
+      }
+
+      // Create manual canvas-based screenshot to avoid oklch color issues
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('Could not get canvas context');
+      }
+      
+      // Set canvas size to match the design canvas
+      const rect = canvasRef.current.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      
+      // Fill background
+      ctx.fillStyle = '#1e293b'; // slate-800
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw border
+      ctx.strokeStyle = '#475569'; // slate-600
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, canvas.width - 2, canvas.height - 2);
+      
+      // Draw the clothing template
+      const clothingTemplate = new Image();
+      clothingTemplate.crossOrigin = 'anonymous';
+      clothingTemplate.src = clothingTemplates[selectedClothing].image;
+      
+      await new Promise((resolve, reject) => {
+        clothingTemplate.onload = () => {
+          ctx.drawImage(clothingTemplate, 0, 0, canvas.width, canvas.height);
+          resolve(void 0);
+        };
+        clothingTemplate.onerror = reject;
+      });
+      
+      // Draw design elements
+      for (const element of elements) {
+        const elementSize = element.size;
+        const x = element.x;
+        const y = element.y;
+        
+        ctx.save();
+        ctx.translate(x + elementSize / 2, y + elementSize / 2);
+        ctx.rotate((element.rotation * Math.PI) / 180);
+        
+        // Set color
+        ctx.fillStyle = element.color;
+        ctx.strokeStyle = element.color;
+        
+        // Draw the element based on type
+        switch (element.type) {
+          case 'star':
+            drawStarOnCanvas(ctx, 0, 0, elementSize / 2);
+            break;
+          case 'saturn':
+            drawSaturnOnCanvas(ctx, 0, 0, elementSize / 2);
+            break;
+          case 'moon':
+            drawMoonOnCanvas(ctx, 0, 0, elementSize / 2);
+            break;
+          case 'circle':
+            drawCircleOnCanvas(ctx, 0, 0, elementSize / 2);
+            break;
+        }
+        
+        ctx.restore();
+      }
+      
+      const screenshot = canvas.toDataURL('image/png').split(',')[1];
+      
+      // Continue with the API call
+      const response = await fetch('/api/test-design', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          screenshot: screenshot,
+          clothingType: selectedClothing
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to test design');
+      }
+
+      const result = await response.json();
+      const newTestResults = {
+        success: result.testResults.success,
+        score: result.testResults.score,
+        detectionCount: result.testResults.detectionCount,
+        confidence: result.testResults.confidence,
+        detections: result.testResults.detections,
+        annotatedImage: result.testResults.annotatedImage,
+        generatedImage: result.testResults.generatedImage
+      };
+      
+      setTestResults(newTestResults);
+
+      // If we're editing an existing design, update it with test results
+      if (loadedDesignId) {
+        const savedDesigns = JSON.parse(localStorage.getItem('savedDesigns') || '[]');
+        const updatedDesigns = savedDesigns.map((design: SavedDesign) => 
+          design.id === loadedDesignId 
+            ? { ...design, testResults: newTestResults }
+            : design
+        );
+        localStorage.setItem('savedDesigns', JSON.stringify(updatedDesigns));
+      }
+      
+    } catch (error) {
+      console.error('Error testing design:', error);
+      setErrorMessage(`Failed to test design: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setShowErrorModal(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSaveClick = () => {
@@ -733,7 +924,7 @@ export default function DesignPage() {
 
         {/* Test Results */}
         {testResults && (
-          <div className="mt-8">
+          <div className="mt-8 space-y-6">
             <Card className={`border-2 ${testResults.success ? 'border-emerald-500 bg-emerald-900/20' : 'border-yellow-500 bg-yellow-900/20'}`}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -744,6 +935,11 @@ export default function DesignPage() {
                     <p className="text-slate-300">
                       AI Confusion Score: {testResults.score}%
                     </p>
+                    {testResults.detectionCount !== undefined && (
+                      <p className="text-slate-400 text-sm">
+                        Detections: {testResults.detectionCount} | Confidence: {testResults.confidence ? (testResults.confidence * 100).toFixed(1) : 0}%
+                      </p>
+                    )}
                   </div>
                   <Badge className={testResults.success ? 'bg-emerald-600' : 'bg-yellow-600'}>
                     {testResults.success ? 'Ready to Order' : 'Needs Work'}
@@ -751,6 +947,7 @@ export default function DesignPage() {
                 </div>
               </CardContent>
             </Card>
+
           </div>
         )}
 
@@ -764,9 +961,13 @@ export default function DesignPage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button onClick={testDesign} className="bg-emerald-400 hover:bg-emerald-300 text-slate-950 px-8 py-4 cursor-pointer">
+                <Button 
+                  onClick={testDesign} 
+                  disabled={isLoading}
+                  className="bg-emerald-400 hover:bg-emerald-300 text-slate-950 px-8 py-4 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <TestTube className="mr-2 h-5 w-5" />
-                  Test Design
+                  {isLoading ? 'Testing...' : 'Test Design'}
                 </Button>
                 <Button onClick={orderDesign} className="bg-slate-800 hover:bg-slate-700 text-slate-100 px-8 py-4 cursor-pointer">
                   <ShoppingBag className="mr-2 h-5 w-5" />
