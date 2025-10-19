@@ -277,7 +277,7 @@ export default function DashboardPage() {
                           size="sm" 
                           variant="outline"
                           onClick={() => handleDeleteClick(design)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-900/20 border-red-500/30"
+                          className="text-red-400 hover:text-red-300 hover:bg-red-900/30 border-red-500/50 bg-slate-800/50 hover:border-red-400 cursor-pointer"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -340,27 +340,27 @@ export default function DashboardPage() {
 
       {/* Delete Confirmation Modal */}
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-slate-900 border-slate-700 text-slate-100">
           <DialogHeader>
             <div className="mx-auto mb-4">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                <AlertTriangle className="w-8 h-8 text-red-600" />
+              <div className="w-16 h-16 bg-red-900/20 border border-red-500/30 rounded-full flex items-center justify-center mx-auto">
+                <AlertTriangle className="w-8 h-8 text-red-400" />
               </div>
             </div>
-            <DialogTitle className="text-xl font-semibold text-center">
+            <DialogTitle className="text-xl font-semibold text-center text-slate-100">
               Delete Design?
             </DialogTitle>
-            <DialogDescription className="text-center text-gray-600">
-              Are you sure you want to delete <strong>"{designToDelete?.name}"</strong>? 
+            <DialogDescription className="text-center text-slate-300">
+              Are you sure you want to delete <strong className="text-slate-100">"{designToDelete?.name}"</strong>? 
               This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           
           <div className="py-4">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
               <div className="flex items-start space-x-3">
-                <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-red-700">
+                <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-red-300">
                   <p className="font-medium mb-1">This will permanently delete:</p>
                   <ul className="list-disc list-inside space-y-1 text-xs">
                     <li>Design name: {designToDelete?.name}</li>
@@ -377,13 +377,13 @@ export default function DashboardPage() {
             <Button 
               variant="outline" 
               onClick={cancelDelete}
-              className="px-6"
+              className="px-6 border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer"
             >
               Cancel
             </Button>
             <Button 
               onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700 text-white px-6"
+              className="bg-red-600 hover:bg-red-700 text-white px-6 cursor-pointer"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete Design

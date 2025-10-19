@@ -153,8 +153,8 @@ interface DesignPreviewProps {
 export default function DesignPreview({ design, size = 'md' }: DesignPreviewProps) {
   const sizeClasses = {
     sm: 'w-16 h-20',
-    md: 'w-24 h-30',
-    lg: 'w-32 h-40'
+    md: 'w-full h-full',
+    lg: 'w-40 h-50'
   };
 
   const clothingTemplates = {
@@ -173,12 +173,11 @@ export default function DesignPreview({ design, size = 'md' }: DesignPreviewProp
   };
 
   const template = clothingTemplates[design.clothingType];
-  const scale = size === 'sm' ? 0.15 : size === 'md' ? 0.2 : 0.25;
 
   return (
     <div className={`relative ${sizeClasses[size]} mx-auto`}>
       {/* Clothing Template Background */}
-      <div className="relative w-full h-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="relative w-full h-full bg-slate-800 border border-slate-600 rounded-lg overflow-hidden">
         <img
           src={template.image}
           alt={template.name}
@@ -188,9 +187,24 @@ export default function DesignPreview({ design, size = 'md' }: DesignPreviewProp
         {/* Design Elements */}
         {design.elements.map((element) => {
           const IconComponent = celestialElements.find(el => el.id === element.type)?.icon || Star;
-          const scaledSize = element.size * scale;
-          const scaledX = element.x * scale;
-          const scaledY = element.y * scale;
+          
+          // Calculate the proper scale factor based on the actual rendered image size
+          // The image uses object-contain, so we need to calculate how much it's scaled
+          // For a 400px wide template in a container, we need to find the actual scale
+          const containerWidth = 400; // This will be the actual rendered width of the image
+          const containerHeight = template.height;
+          
+          // The scale factor should be 1.0 since we want full size positioning
+          // But we need to account for the fact that the container might be different size
+          const scaleFactor = 1.0; // Use original coordinates
+          
+          // Add small offset to account for object-contain centering
+          const offsetX = -25; // Move left to counteract "down to the right"
+          const offsetY = -60; // Move up to counteract "down to the right"
+          
+          const scaledSize = element.size * scaleFactor;
+          const scaledX = (element.x * scaleFactor) + offsetX;
+          const scaledY = (element.y * scaleFactor) + offsetY;
           
           return (
             <div

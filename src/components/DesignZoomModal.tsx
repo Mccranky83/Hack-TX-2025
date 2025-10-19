@@ -68,10 +68,10 @@ export default function DesignZoomModal({ design, isOpen, onClose }: DesignZoomM
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0" showCloseButton={false}>
+      <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-slate-900 border-slate-700" showCloseButton={false}>
         <DialogHeader className="p-6 pb-0">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold">
+            <DialogTitle className="text-xl font-semibold text-slate-100">
               {design.name} - Design Preview
             </DialogTitle>
             <div className="flex items-center space-x-2">
@@ -80,10 +80,11 @@ export default function DesignZoomModal({ design, isOpen, onClose }: DesignZoomM
                 variant="outline"
                 onClick={handleZoomOut}
                 disabled={zoom <= 0.5}
+                className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer disabled:opacity-50"
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
-              <span className="text-sm text-gray-600 min-w-[3rem] text-center">
+              <span className="text-sm text-slate-300 min-w-[3rem] text-center">
                 {Math.round(zoom * 100)}%
               </span>
               <Button
@@ -91,6 +92,7 @@ export default function DesignZoomModal({ design, isOpen, onClose }: DesignZoomM
                 variant="outline"
                 onClick={handleZoomIn}
                 disabled={zoom >= 3}
+                className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer disabled:opacity-50"
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
@@ -98,6 +100,7 @@ export default function DesignZoomModal({ design, isOpen, onClose }: DesignZoomM
                 size="sm"
                 variant="outline"
                 onClick={handleReset}
+                className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer"
               >
                 <RotateCcw className="h-4 w-4" />
               </Button>
@@ -105,7 +108,7 @@ export default function DesignZoomModal({ design, isOpen, onClose }: DesignZoomM
                 size="sm"
                 variant="outline"
                 onClick={onClose}
-                className="ml-2"
+                className="ml-2 border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -116,7 +119,7 @@ export default function DesignZoomModal({ design, isOpen, onClose }: DesignZoomM
         <div className="flex-1 p-6 pt-4">
           <div
             ref={containerRef}
-            className="relative w-full h-[60vh] bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200"
+            className="relative w-full h-[60vh] bg-slate-800 rounded-lg overflow-hidden border-2 border-slate-600"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -136,12 +139,12 @@ export default function DesignZoomModal({ design, isOpen, onClose }: DesignZoomM
             </div>
           </div>
           
-          <div className="mt-4 text-sm text-gray-600">
-            <p><strong>Clothing Type:</strong> {design.clothingType === 'shirt' ? 'T-Shirt' : 'Hoodie'}</p>
-            <p><strong>Elements:</strong> {design.elements.length} design element{design.elements.length !== 1 ? 's' : ''}</p>
-            <p><strong>Created:</strong> {new Date(design.createdAt).toLocaleDateString()}</p>
+          <div className="mt-4 text-sm text-slate-400">
+            <p><strong className="text-slate-300">Clothing Type:</strong> {design.clothingType === 'shirt' ? 'T-Shirt' : 'Hoodie'}</p>
+            <p><strong className="text-slate-300">Elements:</strong> {design.elements.length} design element{design.elements.length !== 1 ? 's' : ''}</p>
+            <p><strong className="text-slate-300">Created:</strong> {new Date(design.createdAt).toLocaleDateString()}</p>
             {design.testResults && (
-              <p><strong>Test Score:</strong> {design.testResults.score}%</p>
+              <p><strong className="text-slate-300">Test Score:</strong> {design.testResults.score}%</p>
             )}
           </div>
         </div>
@@ -172,7 +175,7 @@ function DesignPreviewLarge({ design }: { design: SavedDesign }) {
   return (
     <div className="relative" style={{ width: template.width, height: template.height }}>
       {/* Clothing Template Background */}
-      <div className="relative w-full h-full bg-white border border-gray-300 rounded-lg overflow-hidden">
+      <div className="relative w-full h-full bg-slate-800 border border-slate-600 rounded-lg overflow-hidden">
         <img
           src={template.image}
           alt={template.name}
