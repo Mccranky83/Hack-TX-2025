@@ -318,7 +318,7 @@ export default function DashboardPage() {
       <nav className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-slate-100">Undetectable</span>
+             <span className="text-2xl font-bold text-slate-100 font-mono">404 Apparel</span>
           </div>
           <div className="flex items-center space-x-4">
             <Link href="/settings">
@@ -335,7 +335,7 @@ export default function DashboardPage() {
         {/* Welcome Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold text-slate-100 mb-4">
-            <TypingAnimation text="Your Undetectable Dashboard" className="text-4xl md:text-6xl font-bold text-slate-100" />
+             <TypingAnimation text="Your 404 Apparel Dashboard" className="text-4xl md:text-6xl font-bold text-slate-100" />
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
             Test your patterns and create custom AI-confusing designs

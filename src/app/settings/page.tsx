@@ -25,7 +25,7 @@ export default function SettingsPage() {
             <span>Back to Dashboard</span>
           </Link>
           <div className="flex items-center space-x-4">
-            <span className="text-2xl font-bold text-slate-100">Undetectable</span>
+             <span className="text-2xl font-bold text-slate-100 font-mono">404 Apparel</span>
           </div>
         </div>
       </nav>

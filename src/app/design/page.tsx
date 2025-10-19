@@ -653,7 +653,7 @@ export default function DesignPage() {
           </Link>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-slate-100">Undetectable</span>
+              <span className="text-2xl font-bold text-slate-100 font-mono">404 Apparel</span>
               {loadedDesignId && (
                 <Badge className="bg-blue-600 text-white">
                   Editing Design

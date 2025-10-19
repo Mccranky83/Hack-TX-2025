@@ -8,32 +8,87 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Eye, ShoppingBag, TestTube, Palette, Zap, Terminal, Code, Shield } from "lucide-react";
 
-// Typing animation component with highlighted word
-function TypingAnimation({ text, className = "" }: { text: string; className?: string }) {
+// Typing animation component that cycles through multiple messages
+function TypingAnimation({ className = "" }: { className?: string }) {
+  const messages = [
+    "Be Invisible to AI",
+    "404: Identity not found", 
+    "Protect your identity"
+  ];
+  
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (currentIndex < text.length) {
+    const currentMessage = messages[currentMessageIndex];
+    
+    if (!isDeleting && currentIndex < currentMessage.length) {
+      // Typing forward
       const timeout = setTimeout(() => {
-        setDisplayedText(prev => prev + text[currentIndex]);
+        setDisplayedText(prev => prev + currentMessage[currentIndex]);
         setCurrentIndex(prev => prev + 1);
       }, 100);
       return () => clearTimeout(timeout);
+    } else if (isDeleting && currentIndex > 0) {
+      // Deleting backward
+      const timeout = setTimeout(() => {
+        setDisplayedText(prev => prev.slice(0, -1));
+        setCurrentIndex(prev => prev - 1);
+      }, 50);
+      return () => clearTimeout(timeout);
+    } else if (!isDeleting && currentIndex === currentMessage.length) {
+      // Finished typing, wait then start deleting
+      const timeout = setTimeout(() => {
+        setIsDeleting(true);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    } else if (isDeleting && currentIndex === 0) {
+      // Finished deleting, move to next message
+      setIsDeleting(false);
+      setCurrentMessageIndex(prev => (prev + 1) % messages.length);
     }
-  }, [currentIndex, text]);
+  }, [currentIndex, currentMessageIndex, isDeleting, messages]);
 
-  // Split the text to highlight "Invisible"
+  // Highlight specific words based on the current message
   const renderText = () => {
-    const parts = displayedText.split('Invisible');
-    if (parts.length > 1) {
-      return (
-        <>
-          {parts[0]}
-          <span className="text-emerald-400">Invisible</span>
-          {parts[1]}
-        </>
-      );
+    if (currentMessageIndex === 0) {
+      // "Be Invisible to AI" - highlight "Invisible"
+      const parts = displayedText.split('Invisible');
+      if (parts.length > 1) {
+        return (
+          <>
+            {parts[0]}
+            <span className="text-emerald-400">Invisible</span>
+            {parts[1]}
+          </>
+        );
+      }
+    } else if (currentMessageIndex === 1) {
+      // "404: Identity not found" - highlight "404"
+      const parts = displayedText.split('404');
+      if (parts.length > 1) {
+        return (
+          <>
+            {parts[0]}
+            <span className="text-red-400">404</span>
+            {parts[1]}
+          </>
+        );
+      }
+    } else if (currentMessageIndex === 2) {
+      // "Protect your identity" - highlight "identity"
+      const parts = displayedText.split('identity');
+      if (parts.length > 1) {
+        return (
+          <>
+            {parts[0]}
+            <span className="text-blue-400">identity</span>
+            {parts[1]}
+          </>
+        );
+      }
     }
     return displayedText;
   };
@@ -49,23 +104,20 @@ function TypingAnimation({ text, className = "" }: { text: string; className?: s
 // Professional Image carousel component with controls
 function ImageCarousel() {
   const images = [
-    { src: "/picture1.png", alt: "AI-Confusing Pattern 1" },
-    { src: "/picture2.png", alt: "AI-Confusing Pattern 2" },
-    { src: "/picture3.png", alt: "AI-Confusing Pattern 3" },
-    { src: "/picture4.png", alt: "AI-Confusing Pattern 4" }
+    { src: "/picture2.png", alt: "AI-Confusing Pattern - Rotation 1", rotation: 0 },
+    { src: "/picture2.png", alt: "AI-Confusing Pattern - Rotation 2", rotation: 90 },
+    { src: "/picture2.png", alt: "AI-Confusing Pattern - Rotation 3", rotation: 180 },
+    { src: "/picture2.png", alt: "AI-Confusing Pattern - Rotation 4", rotation: 270 }
   ];
   
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   useEffect(() => {
-    if (!isAutoPlaying) return;
-    
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, [images.length, isAutoPlaying]);
+  }, [images.length]);
 
   const goToNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -79,74 +131,88 @@ function ImageCarousel() {
     setCurrentIndex(index);
   };
 
+  // Get preview images (previous, current, next)
+  const getPreviewImages = () => {
+    const prevIndex = (currentIndex - 1 + images.length) % images.length;
+    const nextIndex = (currentIndex + 1) % images.length;
+    
+    return {
+      prev: images[prevIndex],
+      current: images[currentIndex],
+      next: images[nextIndex]
+    };
+  };
+
+  const previews = getPreviewImages();
+
   return (
     <div className="flex flex-col items-center space-y-6">
-      {/* Just the image - NO OVERLAYS */}
-      <div className="relative w-48 h-48 rounded-xl overflow-hidden border-2 border-slate-700 shadow-2xl">
-        {images.map((image, index) => (
+      {/* Main carousel with side thumbnails */}
+      <div className="flex items-center space-x-6">
+        {/* Previous Image Preview - LEFT */}
+        <div className="flex flex-col items-center space-y-2">
+          <div className="text-xs text-slate-400 font-mono">Previous</div>
+          <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-600 bg-slate-800/50 opacity-60 cursor-pointer hover:opacity-80 transition-opacity" onClick={goToPrevious}>
+            <Image
+              src={previews.prev.src}
+              alt={previews.prev.alt}
+              width={64}
+              height={64}
+              className="w-full h-full object-cover"
+              style={{ transform: `rotate(${previews.prev.rotation}deg)` }}
+              unoptimized
+            />
+          </div>
+        </div>
+
+        {/* Main image - CENTER */}
+        <div className="relative w-48 h-48 rounded-xl overflow-hidden border-2 border-slate-700 shadow-2xl">
+          {images.map((image, index) => (
           <Image
-            key={index}
-            src={image.src}
-            alt={image.alt}
-            width={192}
-            height={192}
-            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${
-              index === currentIndex ? 'opacity-100' : 'opacity-0'
-            }`}
-            priority={index === 0}
-            unoptimized
-          />
-        ))}
-      </div>
-      
-      {/* Status info - BELOW the image */}
-      <div className="text-center">
-        <div className="text-sm text-slate-400 font-mono mb-2">
-          Pattern {currentIndex + 1} of {images.length}
-        </div>
-        <div className="text-xs text-emerald-400 font-mono">
-          {isAutoPlaying ? '● Auto-advancing' : '● Manual control'}
-        </div>
-      </div>
-      
-      {/* Controls - BELOW everything */}
-      <div className="flex flex-col items-center space-y-4">
-        {/* Navigation controls */}
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={goToPrevious}
-            className="w-10 h-10 bg-slate-800 hover:bg-slate-700 border-2 border-slate-600 hover:border-emerald-400 rounded-full flex items-center justify-center text-slate-300 hover:text-emerald-400 transition-all shadow-lg cursor-pointer"
-          >
-            ←
-          </button>
-          <button
-            onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-            className="w-10 h-10 bg-slate-800 hover:bg-slate-700 border-2 border-slate-600 hover:border-emerald-400 rounded-full flex items-center justify-center text-slate-300 hover:text-emerald-400 transition-all shadow-lg cursor-pointer"
-          >
-            {isAutoPlaying ? '⏸' : '▶'}
-          </button>
-          <button
-            onClick={goToNext}
-            className="w-10 h-10 bg-slate-800 hover:bg-slate-700 border-2 border-slate-600 hover:border-emerald-400 rounded-full flex items-center justify-center text-slate-300 hover:text-emerald-400 transition-all shadow-lg cursor-pointer"
-          >
-            →
-          </button>
-        </div>
-        
-        {/* Dot indicators */}
-        <div className="flex space-x-2">
-          {images.map((_, index) => (
-            <button
               key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all shadow-lg ${
-                index === currentIndex 
-                  ? 'bg-emerald-400 scale-125 shadow-emerald-400/50' 
-                  : 'bg-slate-600 hover:bg-slate-500 hover:scale-110'
+              src={image.src}
+              alt={image.alt}
+              width={192}
+              height={192}
+              className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${
+                index === currentIndex ? 'opacity-100' : 'opacity-0'
               }`}
+              style={{ transform: `rotate(${image.rotation}deg)` }}
+              priority={index === 0}
+              unoptimized
             />
           ))}
         </div>
+
+        {/* Next Image Preview - RIGHT */}
+        <div className="flex flex-col items-center space-y-2">
+          <div className="text-xs text-slate-400 font-mono">Next</div>
+          <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-600 bg-slate-800/50 opacity-60 cursor-pointer hover:opacity-80 transition-opacity" onClick={goToNext}>
+          <Image
+              src={previews.next.src}
+              alt={previews.next.alt}
+              width={64}
+              height={64}
+              className="w-full h-full object-cover"
+              style={{ transform: `rotate(${previews.next.rotation}deg)` }}
+              unoptimized
+            />
+          </div>
+        </div>
+      </div>
+      
+      {/* Dot indicators only */}
+      <div className="flex space-x-2">
+        {images.map((_, index) => (
+          <div
+            key={index}
+            className={`w-3 h-3 rounded-full transition-all shadow-lg ${
+              index === currentIndex 
+                ? 'bg-emerald-400 scale-125 shadow-emerald-400/50' 
+                : 'bg-slate-600'
+            }`}
+          />
+        ))}
       </div>
     </div>
   );
@@ -161,7 +227,7 @@ export default function Home() {
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
               <Terminal className="h-6 w-6 text-emerald-400" />
-              <span className="text-xl font-bold text-slate-100">Undetectable</span>
+              <span className="text-xl font-bold text-slate-100 font-mono">404 Apparel</span>
             </div>
             <div className="hidden md:block text-sm text-slate-500 font-mono">
               v2.1.0-alpha
@@ -188,7 +254,7 @@ export default function Home() {
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold text-slate-100 mb-6">
-            <TypingAnimation text="Be Invisible to AI" className="text-slate-100" />
+            <TypingAnimation className="text-slate-100" />
           </h1>
           
           {/* Image Carousel */}
@@ -372,7 +438,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="container mx-auto px-4 py-8 border-t border-slate-800">
         <div className="text-center text-slate-400">
-           <p>&copy; 2025 Undetectable. Confusing AI through strategic pattern design.</p>
+           <p>&copy; 2025 404 Apparel. Confusing AI through strategic pattern design.</p>
            <div className="text-sm mt-2 font-mono text-slate-500">v2.1.0-alpha | System Status: Online</div>
         </div>
       </footer>

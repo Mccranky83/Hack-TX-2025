@@ -37,7 +37,7 @@ export default function SignInPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <span className="text-3xl font-bold text-slate-100">Undetectable</span>
+            <span className="text-3xl font-bold text-slate-100 font-mono">404 Apparel</span>
           </div>
           <p className="text-slate-400">Sign in to your account</p>
         </div>
