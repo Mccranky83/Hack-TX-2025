@@ -312,22 +312,22 @@ export default function DesignPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-mono">
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+          <Link href="/dashboard" className="flex items-center space-x-2 text-slate-400 hover:text-slate-200 transition-colors">
             <ArrowLeft className="h-5 w-5" />
             <span>Back to Dashboard</span>
           </Link>
           <div className="flex items-center space-x-4">
-            <span className="text-2xl font-bold text-gray-900">Undetectable</span>
+            <span className="text-2xl font-bold text-slate-100">Undetectable</span>
             <div className="flex space-x-2">
-              <Button onClick={saveDesign} variant="outline" className="border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white">
+              <Button onClick={saveDesign} variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-slate-100">
                 <Save className="mr-2 h-4 w-4" />
                 Save
               </Button>
-              <Button onClick={orderDesign} className="bg-gray-900 hover:bg-gray-800 text-white">
+              <Button onClick={orderDesign} className="bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-mono">
                 <ShoppingBag className="mr-2 h-4 w-4" />
                 Order
               </Button>
@@ -339,17 +339,17 @@ export default function DesignPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Clothing Type Selector */}
-          <Card className="bg-gray-50 border-gray-200 text-gray-900">
+          <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
             <CardHeader>
-              <CardTitle>Clothing Type</CardTitle>
-              <CardDescription>Choose what you're designing</CardDescription>
+              <CardTitle className="text-slate-100">Clothing Type</CardTitle>
+              <CardDescription className="text-slate-300">Choose what you're designing</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {Object.entries(clothingTemplates).map(([key, template]) => (
                 <Button
                   key={key}
                   variant={selectedClothing === key ? "default" : "outline"}
-                  className={`w-full ${selectedClothing === key ? 'bg-gray-900 text-white' : 'border-gray-300 text-gray-700'}`}
+                  className={`w-full ${selectedClothing === key ? 'bg-emerald-400 text-slate-950' : 'border-slate-600 text-slate-300 hover:bg-slate-800'}`}
                   onClick={() => setSelectedClothing(key as any)}
                 >
                   {template.name}
@@ -360,15 +360,15 @@ export default function DesignPage() {
 
           {/* Design Canvas */}
           <div className="lg:col-span-2">
-            <Card className="bg-gray-50 border-gray-200 text-gray-900">
+            <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
               <CardHeader>
-                <CardTitle>Design Canvas</CardTitle>
-                <CardDescription>Drag elements onto the clothing to create your pattern</CardDescription>
+                <CardTitle className="text-slate-100">Design Canvas</CardTitle>
+                <CardDescription className="text-slate-300">Drag elements onto the clothing to create your pattern</CardDescription>
               </CardHeader>
               <CardContent>
                 <div 
                   ref={canvasRef}
-                  className="relative bg-white border-2 border-dashed border-gray-300 rounded-lg overflow-hidden"
+                  className="relative bg-slate-800 border-2 border-dashed border-slate-600 rounded-lg overflow-hidden"
                   style={{ 
                     width: clothingTemplates[selectedClothing]?.width || 400,
                     height: clothingTemplates[selectedClothing]?.height || 500,
