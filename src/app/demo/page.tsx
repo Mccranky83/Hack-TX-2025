@@ -8,6 +8,44 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Wifi, WifiOff, Play, Square, AlertTriangle } from "lucide-react";
 
+// Typing animation component with highlighted word
+function TypingAnimation({ text, className = "" }: { text: string; className?: string }) {
+  const [displayedText, setDisplayedText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(prev => prev + text[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, text]);
+
+  // Split the text to highlight "Detection"
+  const renderText = () => {
+    const parts = displayedText.split('Detection');
+    if (parts.length > 1) {
+      return (
+        <>
+          {parts[0]}
+          <span className="text-emerald-400">Detection</span>
+          {parts[1]}
+        </>
+      );
+    }
+    return displayedText;
+  };
+
+  return (
+    <span className={className}>
+      {renderText()}
+      <span className="animate-pulse">|</span>
+    </span>
+  );
+}
+
 interface Detection {
   confidence: number;
   bbox: {
@@ -164,7 +202,7 @@ export default function DemoPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-6xl font-bold text-slate-100 mb-4">
-            Live <span className="text-emerald-400">Detection</span> Demo
+            <TypingAnimation text="Live Detection Demo" className="text-4xl md:text-6xl font-bold text-slate-100" />
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
             See computer vision in action. Test how well your clothing patterns confuse AI detection systems.

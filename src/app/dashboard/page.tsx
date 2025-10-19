@@ -1,10 +1,49 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Palette, TestTube, ShoppingBag, Download, Upload, Settings } from "lucide-react";
+
+// Typing animation component with highlighted word
+function TypingAnimation({ text, className = "" }: { text: string; className?: string }) {
+  const [displayedText, setDisplayedText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(prev => prev + text[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, text]);
+
+  // Split the text to highlight "Undetectable"
+  const renderText = () => {
+    const parts = displayedText.split('Undetectable');
+    if (parts.length > 1) {
+      return (
+        <>
+          {parts[0]}
+          <span className="text-emerald-400">Undetectable</span>
+          {parts[1]}
+        </>
+      );
+    }
+    return displayedText;
+  };
+
+  return (
+    <span className={className}>
+      {renderText()}
+      <span className="animate-pulse">|</span>
+    </span>
+  );
+}
 
 export default function DashboardPage() {
   return (
@@ -30,7 +69,7 @@ export default function DashboardPage() {
         {/* Welcome Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold text-slate-100 mb-4">
-            Your <span className="text-emerald-400">Undetectable</span> Dashboard
+            <TypingAnimation text="Your Undetectable Dashboard" className="text-4xl md:text-6xl font-bold text-slate-100" />
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
             Test your patterns and create custom AI-confusing designs
