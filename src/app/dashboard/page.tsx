@@ -5,7 +5,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Palette, TestTube, ShoppingBag, Download, Upload, Settings } from "lucide-react";
+import { ArrowLeft, Palette, TestTube, ShoppingBag, Download, Upload, Settings, Trash2, Edit, AlertTriangle } from "lucide-react";
+import { SavedDesign } from "@/types";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import DesignPreview from "@/components/DesignPreview";
+import DesignZoomModal from "@/components/DesignZoomModal";
 
 // Typing animation component with highlighted word
 function TypingAnimation({ text, className = "" }: { text: string; className?: string }) {
@@ -46,6 +50,73 @@ function TypingAnimation({ text, className = "" }: { text: string; className?: s
 }
 
 export default function DashboardPage() {
+  const [savedDesigns, setSavedDesigns] = useState<SavedDesign[]>([]);
+  
+  // Delete confirmation modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [designToDelete, setDesignToDelete] = useState<SavedDesign | null>(null);
+  
+  // Zoom modal state
+  const [showZoomModal, setShowZoomModal] = useState(false);
+  const [selectedDesign, setSelectedDesign] = useState<SavedDesign | null>(null);
+
+  // Load saved designs from localStorage on component mount
+  useEffect(() => {
+    const designs = JSON.parse(localStorage.getItem('savedDesigns') || '[]');
+    setSavedDesigns(designs);
+  }, []);
+
+  // Show delete confirmation modal
+  const handleDeleteClick = (design: SavedDesign) => {
+    setDesignToDelete(design);
+    setShowDeleteModal(true);
+  };
+
+  // Confirm delete design
+  const confirmDelete = () => {
+    if (designToDelete) {
+      const updatedDesigns = savedDesigns.filter(design => design.id !== designToDelete.id);
+      setSavedDesigns(updatedDesigns);
+      localStorage.setItem('savedDesigns', JSON.stringify(updatedDesigns));
+      setShowDeleteModal(false);
+      setDesignToDelete(null);
+    }
+  };
+
+  // Cancel delete
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setDesignToDelete(null);
+  };
+
+  // Open zoom modal
+  const openZoomModal = (design: SavedDesign) => {
+    setSelectedDesign(design);
+    setShowZoomModal(true);
+  };
+
+  // Close zoom modal
+  const closeZoomModal = () => {
+    setShowZoomModal(false);
+    setSelectedDesign(null);
+  };
+
+  // Get privacy level badge color
+  const getPrivacyLevelColor = (testResults?: { success: boolean; score: number }) => {
+    if (!testResults) return 'bg-gray-600';
+    if (testResults.success) return 'bg-green-600';
+    if (testResults.score >= 70) return 'bg-yellow-600';
+    return 'bg-red-600';
+  };
+
+  // Get privacy level text
+  const getPrivacyLevelText = (testResults?: { success: boolean; score: number }) => {
+    if (!testResults) return 'Not Tested';
+    if (testResults.success) return 'Tested & Ready';
+    if (testResults.score >= 70) return 'Needs Work';
+    return 'Poor Score';
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-mono">
       {/* Navigation */}
@@ -153,103 +224,182 @@ export default function DashboardPage() {
             </Link>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Sample Saved Design Cards */}
-            <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
-              <CardHeader>
-                <div className="aspect-square bg-slate-800 rounded-lg mb-4 flex items-center justify-center border border-slate-600">
-                  <span className="text-slate-400 text-sm">Design Preview</span>
-                </div>
-                <CardTitle className="text-slate-100">Celestial Stars</CardTitle>
-                <CardDescription className="text-slate-300">Custom design with star patterns</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center">
-                  <Badge className="bg-emerald-400/20 text-emerald-400 border-emerald-400/30">Tested & Ready</Badge>
-                  <div className="flex space-x-2">
-                    <Button size="sm" variant="outline" className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
-                      <TestTube className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="outline" className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
-                      <ShoppingBag className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
-              <CardHeader>
-                <div className="aspect-square bg-slate-800 rounded-lg mb-4 flex items-center justify-center border border-slate-600">
-                  <span className="text-slate-400 text-sm">Design Preview</span>
-                </div>
-                <CardTitle className="text-slate-100">Moon Phases</CardTitle>
-                <CardDescription className="text-slate-300">Lunar pattern design</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center">
-                  <Badge className="bg-yellow-400/20 text-yellow-400 border-yellow-400/30">Needs Testing</Badge>
-                  <div className="flex space-x-2">
-                    <Button size="sm" variant="outline" className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
-                      <TestTube className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="outline" className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
-                      <ShoppingBag className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
-              <CardHeader>
-                <div className="aspect-square bg-slate-800 rounded-lg mb-4 flex items-center justify-center border border-slate-600">
-                  <span className="text-slate-400 text-sm">Design Preview</span>
-                </div>
-                <CardTitle className="text-slate-100">Solar Eclipse</CardTitle>
-                <CardDescription className="text-slate-300">Sun and moon combination</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center">
-                  <Badge className="bg-emerald-400/20 text-emerald-400 border-emerald-400/30">Tested & Ready</Badge>
-                  <div className="flex space-x-2">
-                    <Button size="sm" variant="outline" className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
-                      <TestTube className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="outline" className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
-                      <ShoppingBag className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {savedDesigns.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-24 h-24 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Palette className="w-12 h-12 text-slate-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-300 mb-2">No designs saved yet</h3>
+              <p className="text-slate-400 mb-6">Create your first AI-confusing design to get started!</p>
+              <Link href="/design">
+                <Button className="bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-mono cursor-pointer">
+                  <Palette className="mr-2 h-4 w-4" />
+                  Create Your First Design
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {savedDesigns.map((design) => (
+                <Card key={design.id} className="bg-slate-900/50 border-slate-700 text-slate-100">
+                  <CardHeader>
+                    <div 
+                      className="aspect-square bg-slate-800 rounded-lg mb-4 flex items-center justify-center relative overflow-hidden cursor-pointer hover:bg-slate-700 transition-colors group border border-slate-600"
+                      onClick={() => openZoomModal(design)}
+                    >
+                      <DesignPreview design={design} size="md" />
+                      <div className="absolute top-2 right-2">
+                        <Badge variant="outline" className="text-xs bg-slate-700/90 text-slate-100 border-slate-500">
+                          {design.clothingType === 'shirt' ? 'T-Shirt' : 'Hoodie'}
+                        </Badge>
+                      </div>
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-slate-700/90 rounded-full p-2">
+                          <svg className="w-6 h-6 text-slate-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <CardTitle className="text-lg text-slate-100">{design.name}</CardTitle>
+                    <CardDescription className="text-slate-300">{design.description}</CardDescription>
+                    <div className="text-xs text-slate-400">
+                      Created: {new Date(design.createdAt).toLocaleDateString()}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-between items-center mb-3">
+                      <Badge className={getPrivacyLevelColor(design.testResults)}>
+                        {getPrivacyLevelText(design.testResults)}
+                      </Badge>
+                      <div className="flex space-x-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleDeleteClick(design)}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-900/20 border-red-500/30"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Link href={`/design?load=${design.id}`} className="flex-1">
+                        <Button size="sm" variant="outline" className="w-full border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                      </Link>
+                      <Button size="sm" variant="outline" className="flex-1 border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
+                        <TestTube className="h-4 w-4 mr-1" />
+                        Test
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1 border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
+                        <ShoppingBag className="h-4 w-4 mr-1" />
+                        Order
+                      </Button>
+                    </div>
+                    <div className="mt-2 text-xs text-slate-400">
+                      {design.elements.length} element{design.elements.length !== 1 ? 's' : ''}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Quick Stats */}
         <div className="grid md:grid-cols-3 gap-6">
           <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-slate-300 mb-2">5</div>
+              <div className="text-3xl font-bold text-slate-300 mb-2">{savedDesigns.length}</div>
               <div className="text-slate-400">Designs Created</div>
             </CardContent>
           </Card>
           
           <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-emerald-400 mb-2">3</div>
+              <div className="text-3xl font-bold text-emerald-400 mb-2">
+                {savedDesigns.filter(design => design.testResults?.success).length}
+              </div>
               <div className="text-slate-400">Tested & Ready</div>
             </CardContent>
           </Card>
           
           <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-blue-400 mb-2">2</div>
-              <div className="text-slate-400">Orders Placed</div>
+              <div className="text-3xl font-bold text-blue-400 mb-2">
+                {savedDesigns.reduce((total, design) => total + design.elements.length, 0)}
+              </div>
+              <div className="text-slate-400">Total Elements</div>
             </CardContent>
           </Card>
         </div>
       </main>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mx-auto mb-4">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+                <AlertTriangle className="w-8 h-8 text-red-600" />
+              </div>
+            </div>
+            <DialogTitle className="text-xl font-semibold text-center">
+              Delete Design?
+            </DialogTitle>
+            <DialogDescription className="text-center text-gray-600">
+              Are you sure you want to delete <strong>"{designToDelete?.name}"</strong>? 
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-red-700">
+                  <p className="font-medium mb-1">This will permanently delete:</p>
+                  <ul className="list-disc list-inside space-y-1 text-xs">
+                    <li>Design name: {designToDelete?.name}</li>
+                    <li>Description: {designToDelete?.description}</li>
+                    <li>Elements: {designToDelete?.elements.length} design element{designToDelete?.elements.length !== 1 ? 's' : ''}</li>
+                    <li>Created: {designToDelete ? new Date(designToDelete.createdAt).toLocaleDateString() : ''}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="justify-center space-x-3">
+            <Button 
+              variant="outline" 
+              onClick={cancelDelete}
+              className="px-6"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700 text-white px-6"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Design
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Design Zoom Modal */}
+      {selectedDesign && (
+        <DesignZoomModal
+          design={selectedDesign}
+          isOpen={showZoomModal}
+          onClose={closeZoomModal}
+        />
+      )}
     </div>
   );
 }

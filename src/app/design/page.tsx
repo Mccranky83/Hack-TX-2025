@@ -5,7 +5,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Star, Sun, Moon, Circle, RotateCcw, Save, ShoppingBag, TestTube, Palette } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ArrowLeft, Star, Sun, Moon, Circle, RotateCcw, Save, ShoppingBag, TestTube, Palette, X } from "lucide-react";
+import { SavedDesign, DesignElement } from "@/types";
 
 // Custom Saturn component
 const Saturn = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
@@ -180,24 +184,30 @@ const PatternIcon = ({ type, size = 24, className }: { type: string; size?: numb
   );
 };
 
-interface DesignElement {
-  id: string;
-  type: 'star' | 'saturn' | 'moon' | 'circle';
-  x: number;
-  y: number;
-  size: number;
-  color: string;
-  rotation: number;
-}
 
 export default function DesignPage() {
   const [selectedClothing, setSelectedClothing] = useState<'shirt' | 'hoodie'>('shirt');
   const [elements, setElements] = useState<DesignElement[]>([]);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const [hoveredElement, setHoveredElement] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragElement, setDragElement] = useState<string | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [testResults, setTestResults] = useState<{ success: boolean; score: number } | null>(null);
+  
+  // Save modal state
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [designName, setDesignName] = useState('');
+  const [designDescription, setDesignDescription] = useState('');
+  
+  // Success modal state
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [savedDesignName, setSavedDesignName] = useState('');
+  const [redirectCountdown, setRedirectCountdown] = useState(3);
+  
+  // Load design state
+  const [isLoadingDesign, setIsLoadingDesign] = useState(false);
+  const [loadedDesignId, setLoadedDesignId] = useState<string | null>(null);
 
   const clothingTemplates = {
     shirt: { 
@@ -295,19 +305,124 @@ export default function DesignPage() {
     });
   };
 
-  const saveDesign = () => {
-    // Mock save - in real app this would save to user's library
-    const notification = document.createElement('div');
-    notification.className = 'fixed top-6 right-6 bg-slate-900/95 backdrop-blur-sm border border-emerald-500/30 text-slate-100 px-4 py-3 rounded-xl shadow-2xl z-50 font-mono text-sm max-w-sm';
-    notification.innerHTML = `
-      <div class="flex items-center space-x-3">
-        <div class="w-2 h-2 bg-emerald-400 rounded-full"></div>
-        <span>Design saved to your library!</span>
-      </div>
-    `;
-    document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 3000);
+  const handleSaveClick = () => {
+    if (elements.length === 0) {
+      alert('Please add some elements to your design before saving!');
+      return;
+    }
+    
+    // Pre-populate form with existing design data if loading
+    if (loadedDesignId) {
+      const savedDesigns = JSON.parse(localStorage.getItem('savedDesigns') || '[]');
+      const design = savedDesigns.find((d: SavedDesign) => d.id === loadedDesignId);
+      if (design) {
+        setDesignName(design.name);
+        setDesignDescription(design.description);
+      }
+    } else {
+      setDesignName('');
+      setDesignDescription('');
+    }
+    
+    setShowSaveModal(true);
   };
+
+  const handleSaveDesign = () => {
+    if (!designName.trim()) {
+      alert('Please enter a name for your design');
+      return;
+    }
+
+    // Get existing designs from localStorage
+    const existingDesigns = JSON.parse(localStorage.getItem('savedDesigns') || '[]');
+    
+    if (loadedDesignId) {
+      // Update existing design
+      const updatedDesigns = existingDesigns.map((design: SavedDesign) => 
+        design.id === loadedDesignId 
+          ? {
+              ...design,
+              name: designName.trim(),
+              description: designDescription.trim() || 'Custom design',
+              clothingType: selectedClothing,
+              elements: [...elements],
+              testResults: testResults || undefined
+            }
+          : design
+      );
+      localStorage.setItem('savedDesigns', JSON.stringify(updatedDesigns));
+      setSavedDesignName(`${designName} (Updated)`);
+    } else {
+      // Create new design
+      const newDesign: SavedDesign = {
+        id: `design-${Date.now()}`,
+        name: designName.trim(),
+        description: designDescription.trim() || 'Custom design',
+        clothingType: selectedClothing,
+        elements: [...elements],
+        createdAt: new Date(),
+        testResults: testResults || undefined
+      };
+      
+      const updatedDesigns = [...existingDesigns, newDesign];
+      localStorage.setItem('savedDesigns', JSON.stringify(updatedDesigns));
+      setSavedDesignName(designName);
+    }
+    
+    // Close modal and show success
+    setShowSaveModal(false);
+    setRedirectCountdown(3);
+    setShowSuccessModal(true);
+  };
+
+  const handleCancelSave = () => {
+    setShowSaveModal(false);
+    setDesignName('');
+    setDesignDescription('');
+  };
+
+  const handleCloseSuccess = () => {
+    setShowSuccessModal(false);
+    setSavedDesignName('');
+    // Redirect to dashboard after closing success modal
+    window.location.href = '/dashboard';
+  };
+
+  // Load an existing design
+  const loadDesign = (designId: string) => {
+    const savedDesigns = JSON.parse(localStorage.getItem('savedDesigns') || '[]');
+    const design = savedDesigns.find((d: SavedDesign) => d.id === designId);
+    
+    if (design) {
+      setIsLoadingDesign(true);
+      setLoadedDesignId(designId);
+      setElements(design.elements);
+      setSelectedClothing(design.clothingType);
+      setTestResults(design.testResults || null);
+      setIsLoadingDesign(false);
+    }
+  };
+
+  // Check for design ID in URL parameters on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const designId = urlParams.get('load');
+    if (designId) {
+      loadDesign(designId);
+    }
+  }, []);
+
+  // Auto-redirect countdown timer
+  useEffect(() => {
+    if (showSuccessModal && redirectCountdown > 0) {
+      const timer = setTimeout(() => {
+        setRedirectCountdown(redirectCountdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (showSuccessModal && redirectCountdown === 0) {
+      handleCloseSuccess();
+    }
+  }, [showSuccessModal, redirectCountdown]);
 
   const orderDesign = () => {
     // Mock order - in real app this would start checkout process
@@ -326,6 +441,7 @@ export default function DesignPage() {
   const resetCanvas = () => {
     setElements([]);
     setSelectedElement(null);
+    setHoveredElement(null);
     setTestResults(null);
   };
 
@@ -339,9 +455,16 @@ export default function DesignPage() {
             <span>Back to Dashboard</span>
           </Link>
           <div className="flex items-center space-x-4">
-            <span className="text-2xl font-bold text-slate-100">Undetectable</span>
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl font-bold text-slate-100">Undetectable</span>
+              {loadedDesignId && (
+                <Badge className="bg-blue-600 text-white">
+                  Editing Design
+                </Badge>
+              )}
+            </div>
             <div className="flex space-x-2">
-              <Button onClick={saveDesign} variant="outline" className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
+              <Button onClick={handleSaveClick} variant="outline" className="border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
                 <Save className="mr-2 h-4 w-4" />
                 Save
               </Button>
@@ -355,6 +478,15 @@ export default function DesignPage() {
       </nav>
 
       <main className="container mx-auto px-4 py-8">
+        {isLoadingDesign && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading design...</p>
+            </div>
+          </div>
+        )}
+        
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Clothing Type Selector */}
           <Card className="bg-slate-900/50 border-slate-700 text-slate-100">
@@ -426,22 +558,34 @@ export default function DesignPage() {
                     const IconComponent = celestialElements.find(el => el.id === element.type)?.icon || Star;
                     return (
                       <div key={element.id}>
+                        {/* Hover detection zone - covers element + border area */}
                         <div
-                          className={`absolute cursor-move ${selectedElement === element.id ? 'ring-2 ring-blue-500' : ''}`}
+                          className="absolute"
                           style={{
-                            left: element.x,
-                            top: element.y,
-                            transform: `rotate(${element.rotation}deg)`,
-                            width: element.size,
-                            height: element.size
+                            left: element.x - 10,
+                            top: element.y - 10,
+                            width: element.size + 20,
+                            height: element.size + 20,
                           }}
-                          onClick={() => handleElementClick(element.id)}
-                          draggable
-                          onDragStart={(e) => {
-                            e.dataTransfer.setData('element-id', element.id);
-                            e.dataTransfer.effectAllowed = 'move';
-                          }}
+                          onMouseEnter={() => setHoveredElement(element.id)}
+                          onMouseLeave={() => setHoveredElement(null)}
                         >
+                          <div
+                            className={`absolute cursor-move group ${selectedElement === element.id ? 'ring-2 ring-blue-500' : ''}`}
+                            style={{
+                              left: 10,
+                              top: 10,
+                              transform: `rotate(${element.rotation}deg)`,
+                              width: element.size,
+                              height: element.size
+                            }}
+                            onClick={() => handleElementClick(element.id)}
+                            draggable
+                            onDragStart={(e) => {
+                              e.dataTransfer.setData('element-id', element.id);
+                              e.dataTransfer.effectAllowed = 'move';
+                            }}
+                          >
                           {element.color === '#000000' ? (
                             <PatternIcon 
                               type={element.type}
@@ -453,6 +597,25 @@ export default function DesignPage() {
                               className="w-full h-full" 
                               style={{ color: element.color }}
                             />
+                          )}
+                          </div>
+                          
+                          {/* Delete Button - Positioned outside rotated container */}
+                          {hoveredElement === element.id && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteElement(element.id);
+                              }}
+                              className="absolute w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors z-20 cursor-pointer"
+                              style={{
+                                left: element.size,
+                                top: -8
+                              }}
+                              title="Delete element"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
                           )}
                         </div>
                         
@@ -467,7 +630,7 @@ export default function DesignPage() {
                             }}
                           >
                             <div className="space-y-3">
-                              <div className="flex items-center justify-between">
+                              <div className="flex items-center justify-between gap-3">
                                 <span className="text-sm font-medium text-slate-100">Edit Element</span>
                                 <Button 
                                   onClick={() => deleteElement(element.id)}
@@ -636,6 +799,146 @@ export default function DesignPage() {
           </Card>
         </div>
       </main>
+
+      {/* Save Design Modal */}
+      <Dialog open={showSaveModal} onOpenChange={setShowSaveModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {loadedDesignId ? 'Update Design' : 'Save Design'}
+            </DialogTitle>
+            <DialogDescription>
+              {loadedDesignId 
+                ? 'Update your design name and description, then save the changes.'
+                : 'Give your design a name and description to save it to your library.'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="design-name">Design Name *</Label>
+              <Input
+                id="design-name"
+                placeholder="Enter design name..."
+                value={designName}
+                onChange={(e) => setDesignName(e.target.value)}
+                className="w-full"
+                autoFocus
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="design-description">Description (Optional)</Label>
+              <Input
+                id="design-description"
+                placeholder="Enter design description..."
+                value={designDescription}
+                onChange={(e) => setDesignDescription(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            
+            <div className="text-sm text-gray-600">
+              <p><strong>Clothing Type:</strong> {selectedClothing === 'shirt' ? 'T-Shirt' : 'Hoodie'}</p>
+              <p><strong>Elements:</strong> {elements.length} design element{elements.length !== 1 ? 's' : ''}</p>
+              {testResults && (
+                <p><strong>Test Score:</strong> {testResults.score}%</p>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={handleCancelSave}
+              className="mr-2 cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveDesign}
+              disabled={!designName.trim()}
+              className="bg-gray-900 hover:bg-gray-800 text-white cursor-pointer"
+            >
+              <Save className="mr-2 h-4 w-4" />
+              {loadedDesignId ? 'Update Design' : 'Save Design'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Modal */}
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent className="sm:max-w-md text-center">
+          <DialogHeader>
+            <div className="mx-auto mb-4">
+              {/* Success Animation */}
+              <div className="relative">
+                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                    <svg 
+                      className="w-8 h-8 text-white" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={3} 
+                        d="M5 13l4 4L19 7" 
+                      />
+                    </svg>
+                  </div>
+                </div>
+                {/* Confetti Animation */}
+                <div className="absolute -top-2 -left-2 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
+                <div className="absolute -top-1 -right-3 w-3 h-3 bg-pink-400 rounded-full animate-ping" style={{animationDelay: '0.2s'}}></div>
+                <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-blue-400 rounded-full animate-ping" style={{animationDelay: '0.4s'}}></div>
+                <div className="absolute -bottom-2 -right-2 w-3 h-3 bg-purple-400 rounded-full animate-ping" style={{animationDelay: '0.6s'}}></div>
+              </div>
+            </div>
+            <DialogTitle className="text-2xl font-bold text-green-600">
+              🎉 Congratulations! 🎉
+            </DialogTitle>
+            <DialogDescription className="text-lg text-gray-700">
+              Your design <strong>"{savedDesignName}"</strong> has been successfully saved to your library!
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center justify-center space-x-2 text-green-700">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="font-medium">Design saved successfully!</span>
+              </div>
+            </div>
+            
+             <div className="text-sm text-gray-600 space-y-1">
+               <p>✨ Your design is now available in your dashboard</p>
+               <p>🎨 You can view, edit, or order it anytime</p>
+               <p>🚀 Ready to create more AI-confusing patterns!</p>
+               <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                 <p className="text-blue-700 font-medium">
+                   Redirecting to dashboard in {redirectCountdown} second{redirectCountdown !== 1 ? 's' : ''}...
+                 </p>
+               </div>
+             </div>
+          </div>
+          
+          <DialogFooter className="justify-center">
+             <Button 
+               onClick={handleCloseSuccess}
+               className="bg-green-600 hover:bg-green-700 text-white px-8 py-2 cursor-pointer"
+             >
+               {redirectCountdown > 0 ? `Continue (${redirectCountdown})` : 'Continue Now'}
+             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
