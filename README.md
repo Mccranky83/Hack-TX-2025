@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PrivacyWear - Privacy by Fashion
 
-## Getting Started
+A modern frontend for a hackathon prototype showcasing "privacy-by-fashion" concept. This app demonstrates how clothing can be designed to hide from YOLO computer vision detection.
 
-First, run the development server:
+## 🚀 Quick Start
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Start development server:**
+   ```bash
+   npm run dev
+   ```
+
+3. **Open your browser:**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 🛠️ Tech Stack
+
+- **Next.js 15** with App Router
+- **TypeScript** for type safety
+- **Tailwind CSS** for styling
+- **shadcn/ui** for components
+- **Lucide React** for icons
+
+## 📱 Features
+
+### 🏠 Hero/Dashboard Page
+- Marketing-focused landing page
+- Clear value proposition for privacy-by-fashion
+- Call-to-action buttons for testing and shopping
+- Privacy level explanations
+- Responsive design
+
+### 🧪 Test Your Privacy Page
+- **Image Upload**: Upload photos to test detection
+- **Camera Capture**: Use webcam for real-time testing
+- **Mock Detection**: Simulates YOLO detection results
+- **Results Display**: Clear PASS/FAIL indicators
+- **Confidence Scores**: Shows detection confidence levels
+
+### 🛍️ Shop Page
+- **Product Grid**: Browse privacy-focused clothing
+- **Filtering**: Filter by category, privacy level, search
+- **Product Details**: Modal with size/color selection
+- **Shopping Cart**: Local storage-based cart
+- **Mock Checkout**: Simulated checkout process
+
+### 🔐 Sign In Page
+- Clean authentication interface
+- Demo credentials provided
+- Privacy policy links
+
+## 🎨 Design Features
+
+- **Dark Theme**: Sleek purple/slate gradient design
+- **Mobile-First**: Fully responsive across all devices
+- **Accessibility**: ARIA labels, keyboard navigation
+- **Performance**: Optimized images, lazy loading
+- **Modern UI**: Clean, professional interface
+
+## 📊 Privacy Levels
+
+- **Basic (60-70%)**: Subtle anti-detection patterns
+- **Enhanced (80-85%)**: Advanced pattern disruption  
+- **Maximum (90-95%)**: Cutting-edge invisibility tech
+
+## 🔧 Backend Integration Points
+
+The app is designed with clear TODO markers for backend integration:
+
+- `POST /api/detect` - Image detection endpoint
+- `GET /api/products` - Product catalog
+- `POST /api/cart` - Cart management
+- `POST /api/checkout` - Mock checkout
+- `GET /api/user/profile` - User profile
+
+## 📁 Project Structure
+
+```
+src/
+├── app/                 # Next.js App Router pages
+│   ├── page.tsx         # Hero/Dashboard page
+│   ├── test/            # Privacy testing page
+│   ├── shop/            # Product catalog & cart
+│   └── signin/          # Authentication page
+├── components/ui/       # shadcn/ui components
+├── types/               # TypeScript definitions
+├── data/                # Mock data
+└── lib/                 # Utilities
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Deployment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This app is ready for deployment on:
+- **Vercel** (recommended for Next.js)
+- **Netlify**
+- **Railway**
+- Any platform supporting Node.js
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🎯 Hackathon Demo Flow
 
-## Learn More
+1. **Landing Page**: Show the concept and value proposition
+2. **Test Privacy**: Demonstrate the detection tool with mock results
+3. **Shop Collection**: Browse products and add to cart
+4. **Checkout**: Complete the mock purchase flow
 
-To learn more about Next.js, take a look at the following resources:
+## 🔮 Future Enhancements
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Real computer vision API integration
+- User authentication system
+- Payment processing
+- Product reviews and ratings
+- Size guide and recommendations
+- Social sharing features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+**Built for TX2025 Hackathon** 🏆
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*Protecting your privacy through fashion*
