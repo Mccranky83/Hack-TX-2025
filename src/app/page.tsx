@@ -51,8 +51,7 @@ function ImageCarousel() {
   const images = [
     { src: "/picture1.png", alt: "AI-Confusing Pattern 1" },
     { src: "/picture2.png", alt: "AI-Confusing Pattern 2" },
-    { src: "/picture3.png", alt: "AI-Confusing Pattern 3" },
-    { src: "/picture4.png", alt: "AI-Confusing Pattern 4" }
+    { src: "/picture3.png", alt: "AI-Confusing Pattern 3" }
   ];
   
   const [currentIndex, setCurrentIndex] = useState(0);

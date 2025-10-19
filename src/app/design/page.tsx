@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowLeft, Star, Sun, Moon, Circle, RotateCcw, Save, ShoppingBag, TestTube, Palette, X } from "lucide-react";
 import { SavedDesign, DesignElement } from "@/types";
+import OrderModal from "@/components/OrderModal";
 
 // Custom Saturn component
 const Saturn = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
@@ -212,6 +213,9 @@ export default function DesignPage() {
   // Error modal state
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  
+  // Order modal state
+  const [showOrderModal, setShowOrderModal] = useState(false);
 
   const clothingTemplates = {
     shirt: { 
@@ -431,17 +435,7 @@ export default function DesignPage() {
   }, [showSuccessModal, redirectCountdown]);
 
   const orderDesign = () => {
-    // Mock order - in real app this would start checkout process
-    const notification = document.createElement('div');
-    notification.className = 'fixed top-6 right-6 bg-slate-900/95 backdrop-blur-sm border border-blue-500/30 text-slate-100 px-4 py-3 rounded-xl shadow-2xl z-50 font-mono text-sm max-w-sm';
-    notification.innerHTML = `
-      <div class="flex items-center space-x-3">
-        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
-        <span>Redirecting to checkout...</span>
-      </div>
-    `;
-    document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 3000);
+    setShowOrderModal(true);
   };
 
   const resetCanvas = () => {
@@ -977,6 +971,23 @@ export default function DesignPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Order Modal */}
+      {elements.length > 0 && (
+        <OrderModal
+          design={{
+            id: 'current-design',
+            name: designName || 'Untitled Design',
+            description: designDescription || 'Custom design',
+            clothingType: selectedClothing,
+            elements,
+            createdAt: new Date(),
+            testResults,
+          }}
+          isOpen={showOrderModal}
+          onClose={() => setShowOrderModal(false)}
+        />
+      )}
     </div>
   );
 }
