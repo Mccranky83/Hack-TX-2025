@@ -2,21 +2,20 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Eye, ShoppingBag, TestTube } from "lucide-react";
+import { Eye, ShoppingBag, TestTube, Palette, Zap } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Shield className="h-8 w-8 text-purple-400" />
-            <span className="text-2xl font-bold text-white">PrivacyWear</span>
+            <span className="text-2xl font-bold text-gray-900">Undetectable</span>
           </div>
           <div className="flex items-center space-x-4">
             <Link href="/signin">
-              <Button variant="outline" className="text-white border-white hover:bg-white hover:text-black">
+              <Button variant="outline" className="text-gray-900 border-gray-900 hover:bg-gray-900 hover:text-white">
                 Sign In
               </Button>
             </Link>
@@ -27,24 +26,24 @@ export default function Home() {
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-            Hide from <span className="text-purple-400">AI</span> with Style
+          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
+            Be Invisible to <span className="text-gray-700">AI</span>
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
-            Revolutionary clothing that makes you invisible to computer vision detection. 
-            Stay private while staying fashionable.
+          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            Revolutionary clothing patterns that confuse computer vision algorithms. 
+            Make yourself invisible to AI surveillance through strategic design.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/test">
-              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg">
-                <TestTube className="mr-2 h-5 w-5" />
-                Test Your Privacy
+            <Link href="/signin">
+              <Button size="lg" className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 text-lg">
+                <Zap className="mr-2 h-5 w-5" />
+                Get Started
               </Button>
             </Link>
-            <Link href="/shop">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-black px-8 py-4 text-lg">
-                <ShoppingBag className="mr-2 h-5 w-5" />
-                Shop Collection
+            <Link href="/test">
+              <Button size="lg" variant="outline" className="border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white px-8 py-4 text-lg">
+                <TestTube className="mr-2 h-5 w-5" />
+                Test Detection
               </Button>
             </Link>
           </div>
@@ -52,32 +51,32 @@ export default function Home() {
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <Card className="bg-slate-800/50 border-slate-700 text-white">
+          <Card className="bg-gray-50 border-gray-200 text-gray-900">
             <CardHeader>
-              <Eye className="h-12 w-12 text-purple-400 mb-4" />
-              <CardTitle>Anti-Detection Technology</CardTitle>
-              <CardDescription>
-                Advanced patterns and materials designed to confuse YOLO and other computer vision algorithms
+              <Eye className="h-12 w-12 text-gray-600 mb-4" />
+              <CardTitle>AI-Confusing Patterns</CardTitle>
+              <CardDescription className="text-gray-600">
+                Strategic patterns designed to confuse computer vision algorithms and make you invisible to AI detection
               </CardDescription>
             </CardHeader>
           </Card>
 
-          <Card className="bg-slate-800/50 border-slate-700 text-white">
+          <Card className="bg-gray-50 border-gray-200 text-gray-900">
             <CardHeader>
-              <Shield className="h-12 w-12 text-purple-400 mb-4" />
-              <CardTitle>Privacy by Design</CardTitle>
-              <CardDescription>
-                Built with privacy-first principles. Your data stays yours, and you stay invisible to surveillance
+              <Palette className="h-12 w-12 text-gray-600 mb-4" />
+              <CardTitle>Custom Designs</CardTitle>
+              <CardDescription className="text-gray-600">
+                Create your own personal patterns or choose from our library of proven AI-confusing designs
               </CardDescription>
             </CardHeader>
           </Card>
 
-          <Card className="bg-slate-800/50 border-slate-700 text-white">
+          <Card className="bg-gray-50 border-gray-200 text-gray-900">
             <CardHeader>
-              <ShoppingBag className="h-12 w-12 text-purple-400 mb-4" />
-              <CardTitle>Fashion Forward</CardTitle>
-              <CardDescription>
-                Stylish designs that don't compromise on aesthetics. Look good while staying private
+              <Zap className="h-12 w-12 text-gray-600 mb-4" />
+              <CardTitle>Proven Technology</CardTitle>
+              <CardDescription className="text-gray-600">
+                Tested patterns that effectively disrupt YOLO, R-CNN, and other computer vision systems
               </CardDescription>
             </CardHeader>
           </Card>
@@ -85,84 +84,81 @@ export default function Home() {
 
         {/* How It Works */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-8">How It Works</h2>
+          <h2 className="text-4xl font-bold text-gray-900 mb-8">How It Works</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+              <div className="bg-gray-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-white">1</span>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Choose Your Style</h3>
-              <p className="text-gray-300">Browse our collection of privacy-focused clothing</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Choose Your Pattern</h3>
+              <p className="text-gray-600">Select from proven AI-confusing patterns or create your own design</p>
             </div>
             <div className="text-center">
-              <div className="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+              <div className="bg-gray-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-white">2</span>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Test Your Privacy</h3>
-              <p className="text-gray-300">Use our detection tool to verify your invisibility</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Test Effectiveness</h3>
+              <p className="text-gray-600">Use our detection tool to verify your pattern confuses AI algorithms</p>
             </div>
             <div className="text-center">
-              <div className="bg-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+              <div className="bg-gray-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-white">3</span>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Stay Protected</h3>
-              <p className="text-gray-300">Wear with confidence knowing you're protected from AI surveillance</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Stay Invisible</h3>
+              <p className="text-gray-600">Wear your custom pattern and remain undetected by AI surveillance</p>
             </div>
           </div>
         </div>
 
-        {/* Privacy Levels */}
+        {/* The Surveillance Reality */}
         <div className="mb-16">
-          <h2 className="text-4xl font-bold text-white text-center mb-8">Privacy Levels</h2>
+          <h2 className="text-4xl font-bold text-gray-900 text-center mb-8">The AI Surveillance Reality</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            <Card className="bg-slate-800/50 border-slate-700 text-white">
+            <Card className="bg-gray-50 border-gray-200 text-gray-900">
               <CardHeader>
-                <Badge className="w-fit bg-green-600">Basic</Badge>
-                <CardTitle>Stealth Mode</CardTitle>
-                <CardDescription>60-70% detection avoidance</CardDescription>
+                <CardTitle>Every Face is a Data Point</CardTitle>
+                <CardDescription>AI systems track, analyze, and profile you 24/7</CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Perfect for everyday wear with subtle anti-detection patterns</p>
+                <p>Every camera you pass feeds your biometric data to AI systems that build detailed profiles of your movements, emotions, and behavior. Your face is being harvested for corporate and government databases without your consent.</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700 text-white">
+            <Card className="bg-gray-50 border-gray-200 text-gray-900">
               <CardHeader>
-                <Badge className="w-fit bg-yellow-600">Enhanced</Badge>
-                <CardTitle>Ghost Mode</CardTitle>
-                <CardDescription>80-85% detection avoidance</CardDescription>
+                <CardTitle>Predictive Policing & Social Control</CardTitle>
+                <CardDescription>AI determines your "risk level" before you commit any crime</CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Advanced pattern disruption for better protection</p>
+                <p>AI surveillance systems are already predicting "criminal behavior" based on facial expressions, gait analysis, and social connections. Your freedom of movement is being algorithmically restricted before you even act.</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700 text-white">
+            <Card className="bg-gray-50 border-gray-200 text-gray-900">
               <CardHeader>
-                <Badge className="w-fit bg-red-600">Maximum</Badge>
-                <CardTitle>Invisible Mode</CardTitle>
-                <CardDescription>90-95% detection avoidance</CardDescription>
+                <CardTitle>Corporate Behavior Modification</CardTitle>
+                <CardDescription>Your emotions and reactions are being manipulated in real-time</CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Cutting-edge technology for maximum invisibility</p>
+                <p>Retail AI systems analyze your facial expressions to manipulate your purchasing decisions. Your emotional state is being weaponized against you to extract maximum profit from your vulnerability.</p>
               </CardContent>
             </Card>
           </div>
         </div>
 
         {/* CTA Section */}
-        <div className="text-center bg-slate-800/30 rounded-2xl p-12">
-          <h2 className="text-3xl font-bold text-white mb-4">Ready to Take Control of Your Privacy?</h2>
-          <p className="text-gray-300 mb-8">Join thousands of privacy-conscious individuals who choose style and security</p>
+        <div className="text-center bg-gray-100 rounded-2xl p-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Fight Back Against AI Surveillance</h2>
+          <p className="text-gray-600 mb-8">Join the resistance. Take back your autonomy from algorithmic control and corporate surveillance. Your face, your choice.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/test">
-              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4">
-                Test Your Privacy Now
+            <Link href="/signin">
+              <Button size="lg" className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4">
+                Get Started
               </Button>
             </Link>
-            <Link href="/shop">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-black px-8 py-4">
-                Shop Collection
+            <Link href="/test">
+              <Button size="lg" variant="outline" className="border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white px-8 py-4">
+                Test Detection
               </Button>
             </Link>
           </div>
@@ -170,9 +166,9 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="container mx-auto px-4 py-8 border-t border-slate-700">
-        <div className="text-center text-gray-400">
-          <p>&copy; 2025 PrivacyWear. Protecting your privacy through fashion.</p>
+      <footer className="container mx-auto px-4 py-8 border-t border-gray-200">
+        <div className="text-center text-gray-500">
+           <p>&copy; 2025 Undetectable. Confusing AI through strategic pattern design.</p>
         </div>
       </footer>
     </div>

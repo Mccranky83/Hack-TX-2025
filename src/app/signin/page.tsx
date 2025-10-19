@@ -20,16 +20,16 @@ export default function SignInPage() {
     // Mock sign-in - in real app this would call your auth API
     setTimeout(() => {
       setIsLoading(false);
-      // For demo purposes, just redirect to home
-      window.location.href = '/';
+      // Redirect to dashboard after login
+      window.location.href = '/dashboard';
     }, 1000);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Back Button */}
-        <Link href="/" className="flex items-center space-x-2 text-white hover:text-purple-400 transition-colors mb-8">
+        <Link href="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors mb-8">
           <ArrowLeft className="h-5 w-5" />
           <span>Back to Home</span>
         </Link>
@@ -37,18 +37,17 @@ export default function SignInPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <Shield className="h-12 w-12 text-purple-400" />
-            <span className="text-3xl font-bold text-white">PrivacyWear</span>
+            <span className="text-3xl font-bold text-gray-900">Undetectable</span>
           </div>
-          <p className="text-gray-300">Sign in to your account</p>
+          <p className="text-gray-600">Sign in to your account</p>
         </div>
 
         {/* Sign In Form */}
-        <Card className="bg-slate-800/50 border-slate-700 text-white">
+        <Card className="bg-gray-50 border-gray-200 text-gray-900">
           <CardHeader>
             <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
-            <CardDescription className="text-center text-gray-300">
-              Sign in to access your privacy dashboard
+            <CardDescription className="text-center text-gray-600">
+              Sign in to access your AI-confusing dashboard
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -63,7 +62,7 @@ export default function SignInPage() {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 bg-slate-700 border-slate-600 text-white"
+                    className="pl-10 bg-white border-gray-300 text-gray-900"
                     required
                   />
                 </div>
@@ -79,7 +78,7 @@ export default function SignInPage() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 bg-slate-700 border-slate-600 text-white"
+                    className="pl-10 bg-white border-gray-300 text-gray-900"
                     required
                   />
                 </div>
@@ -87,7 +86,7 @@ export default function SignInPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-purple-600 hover:bg-purple-700"
+                className="w-full bg-gray-900 hover:bg-gray-800"
                 disabled={isLoading}
               >
                 {isLoading ? 'Signing in...' : 'Sign In'}
@@ -95,32 +94,32 @@ export default function SignInPage() {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-600 text-sm">
                 Don't have an account?{' '}
-                <Link href="/signup" className="text-purple-400 hover:text-purple-300">
+                <Link href="/signup" className="text-red-600 hover:text-red-700">
                   Sign up
                 </Link>
               </p>
             </div>
 
             {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-slate-700/50 rounded-lg">
-              <p className="text-sm text-gray-300 mb-2">Demo Credentials:</p>
-              <p className="text-xs text-gray-400">Email: demo@privacywear.com</p>
-              <p className="text-xs text-gray-400">Password: demo123</p>
+            <div className="mt-6 p-4 bg-gray-200 rounded-lg">
+              <p className="text-sm text-gray-700 mb-2">Demo Credentials:</p>
+              <p className="text-xs text-gray-600">Email: demo@undetectable.com</p>
+              <p className="text-xs text-gray-600">Password: demo123</p>
             </div>
           </CardContent>
         </Card>
 
         {/* Privacy Notice */}
         <div className="mt-8 text-center">
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-500">
             By signing in, you agree to our{' '}
-            <Link href="/privacy" className="text-purple-400 hover:text-purple-300">
+            <Link href="/privacy" className="text-red-600 hover:text-red-700">
               Privacy Policy
             </Link>
             {' '}and{' '}
-            <Link href="/terms" className="text-purple-400 hover:text-purple-300">
+            <Link href="/terms" className="text-red-600 hover:text-red-700">
               Terms of Service
             </Link>
           </p>
