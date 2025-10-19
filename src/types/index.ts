@@ -21,6 +21,29 @@ export interface CartItem {
   selectedColor: string;
 }
 
+export interface DesignElement {
+  id: string;
+  type: 'star' | 'saturn' | 'moon' | 'circle';
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  rotation: number;
+}
+
+export interface SavedDesign {
+  id: string;
+  name: string;
+  description: string;
+  clothingType: 'shirt' | 'hoodie';
+  elements: DesignElement[];
+  createdAt: Date;
+  testResults?: {
+    success: boolean;
+    score: number;
+  };
+}
+
 export interface UserProfile {
   id: string;
   name: string;
