@@ -67,6 +67,16 @@ export default function DashboardPage() {
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [designToOrder, setDesignToOrder] = useState<SavedDesign | null>(null);
 
+  // Test functionality state
+  const [testingDesign, setTestingDesign] = useState<string | null>(null);
+  const [testResults, setTestResults] = useState<{ [designId: string]: { 
+    success: boolean; 
+    score: number;
+    detectionCount?: number;
+    confidence?: number;
+    detections?: any[];
+  } }>({});
+
   // Load saved designs from localStorage on component mount
   useEffect(() => {
     const designs = JSON.parse(localStorage.getItem('savedDesigns') || '[]');
@@ -120,19 +130,204 @@ export default function DashboardPage() {
     setDesignToOrder(null);
   };
 
+  // Test design function
+  const testDesign = async (design: SavedDesign) => {
+    setTestingDesign(design.id);
+    
+    try {
+      // Create a canvas to render the design
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('Could not get canvas context');
+      }
+
+      canvas.width = 400;
+      canvas.height = 500;
+
+      // Draw background
+      ctx.fillStyle = '#1e293b'; // slate-800
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw border
+      ctx.strokeStyle = '#475569'; // slate-600
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, canvas.width - 2, canvas.height - 2);
+
+      // Draw clothing template
+      const clothingTemplate = new Image();
+      clothingTemplate.crossOrigin = 'anonymous';
+      clothingTemplate.src = design.clothingType === 'shirt' 
+        ? '/images/fordesigning/blacktshirt.png!bw700' 
+        : '/images/fordesigning/blacksweatshirt.webp';
+
+      await new Promise((resolve, reject) => {
+        clothingTemplate.onload = () => {
+          ctx.drawImage(clothingTemplate, 0, 0, canvas.width, canvas.height);
+          resolve(void 0);
+        };
+        clothingTemplate.onerror = reject;
+      });
+
+      // Draw design elements
+      for (const element of design.elements) {
+        const elementSize = element.size;
+        const x = element.x;
+        const y = element.y;
+
+        ctx.save();
+        ctx.translate(x + elementSize / 2, y + elementSize / 2);
+        ctx.rotate((element.rotation * Math.PI) / 180);
+
+        ctx.fillStyle = element.color;
+        ctx.strokeStyle = element.color;
+
+        switch (element.type) {
+          case 'star':
+            drawStarOnCanvas(ctx, 0, 0, elementSize / 2);
+            break;
+          case 'saturn':
+            drawSaturnOnCanvas(ctx, 0, 0, elementSize / 2);
+            break;
+          case 'moon':
+            drawMoonOnCanvas(ctx, 0, 0, elementSize / 2);
+            break;
+          case 'circle':
+            drawCircleOnCanvas(ctx, 0, 0, elementSize / 2);
+            break;
+        }
+        ctx.restore();
+      }
+
+      const screenshot = canvas.toDataURL('image/png').split(',')[1];
+
+      // Call the test API
+      const response = await fetch('/api/test-design', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          screenshot,
+          clothingType: design.clothingType
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to test design');
+      }
+
+      const result = await response.json();
+      
+      // Update test results
+      setTestResults(prev => ({
+        ...prev,
+        [design.id]: {
+          success: result.testResults.success,
+          score: result.testResults.score,
+          detectionCount: result.testResults.detectionCount,
+          confidence: result.testResults.confidence,
+          detections: result.testResults.detections
+        }
+      }));
+
+      // Update the design in localStorage
+      const updatedDesigns = savedDesigns.map(d => 
+        d.id === design.id 
+          ? { ...d, testResults: {
+              success: result.testResults.success,
+              score: result.testResults.score,
+              detectionCount: result.testResults.detectionCount,
+              confidence: result.testResults.confidence,
+              detections: result.testResults.detections
+            }}
+          : d
+      );
+      setSavedDesigns(updatedDesigns);
+      localStorage.setItem('savedDesigns', JSON.stringify(updatedDesigns));
+      
+    } catch (error) {
+      console.error('Error testing design:', error);
+      alert(`Failed to test design: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setTestingDesign(null);
+    }
+  };
+
+  // Canvas drawing functions
+  const drawStarOnCanvas = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) => {
+    const spikes = 5;
+    const outerRadius = radius;
+    const innerRadius = radius * 0.4;
+    
+    ctx.beginPath();
+    for (let i = 0; i < spikes * 2; i++) {
+      const angle = (i * Math.PI) / spikes;
+      const r = i % 2 === 0 ? outerRadius : innerRadius;
+      const px = x + Math.cos(angle) * r;
+      const py = y + Math.sin(angle) * r;
+      
+      if (i === 0) {
+        ctx.moveTo(px, py);
+      } else {
+        ctx.lineTo(px, py);
+      }
+    }
+    ctx.closePath();
+    ctx.fill();
+  };
+
+  const drawSaturnOnCanvas = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) => {
+    // Main planet
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Rings
+    ctx.strokeStyle = ctx.fillStyle;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 1.2, 0, 2 * Math.PI);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 1.4, 0, 2 * Math.PI);
+    ctx.stroke();
+  };
+
+  const drawMoonOnCanvas = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) => {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Crescent effect
+    ctx.fillStyle = '#1e293b';
+    ctx.beginPath();
+    ctx.arc(x - radius * 0.3, y, radius * 0.8, 0, 2 * Math.PI);
+    ctx.fill();
+  };
+
+  const drawCircleOnCanvas = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) => {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    ctx.fill();
+  };
+
   // Get privacy level badge color
-  const getPrivacyLevelColor = (testResults?: { success: boolean; score: number }) => {
-    if (!testResults) return 'bg-gray-600';
-    if (testResults.success) return 'bg-green-600';
-    if (testResults.score >= 70) return 'bg-yellow-600';
+  const getPrivacyLevelColor = (design: SavedDesign) => {
+    const currentResults = testResults[design.id] || design.testResults;
+    if (!currentResults) return 'bg-gray-600';
+    if (currentResults.success) return 'bg-green-600';
+    if (currentResults.score >= 70) return 'bg-yellow-600';
     return 'bg-red-600';
   };
 
   // Get privacy level text
-  const getPrivacyLevelText = (testResults?: { success: boolean; score: number }) => {
-    if (!testResults) return 'Not Tested';
-    if (testResults.success) return 'Tested & Ready';
-    if (testResults.score >= 70) return 'Needs Work';
+  const getPrivacyLevelText = (design: SavedDesign) => {
+    const currentResults = testResults[design.id] || design.testResults;
+    if (!currentResults) return 'Not Tested';
+    if (currentResults.success) return 'Tested & Ready';
+    if (currentResults.score >= 70) return 'Needs Work';
     return 'Poor Score';
   };
 
@@ -142,7 +337,7 @@ export default function DashboardPage() {
       <nav className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-slate-100">Undetectable</span>
+             <span className="text-2xl font-bold text-slate-100 font-mono">404 Apparel</span>
           </div>
           <div className="flex items-center space-x-4">
             <CartButton />
@@ -160,7 +355,7 @@ export default function DashboardPage() {
         {/* Welcome Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold text-slate-100 mb-4">
-            <TypingAnimation text="Your Undetectable Dashboard" className="text-4xl md:text-6xl font-bold text-slate-100" />
+             <TypingAnimation text="Your 404 Apparel Dashboard" className="text-4xl md:text-6xl font-bold text-slate-100" />
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
             Test your patterns and create custom AI-confusing designs
@@ -289,8 +484,8 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between items-center mb-3">
-                      <Badge className={getPrivacyLevelColor(design.testResults)}>
-                        {getPrivacyLevelText(design.testResults)}
+                      <Badge className={getPrivacyLevelColor(design)}>
+                        {getPrivacyLevelText(design)}
                       </Badge>
                       <div className="flex space-x-1">
                         <Button 
@@ -310,9 +505,15 @@ export default function DashboardPage() {
                           Edit
                         </Button>
                       </Link>
-                      <Button size="sm" variant="outline" className="flex-1 border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex-1 border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer"
+                        onClick={() => testDesign(design)}
+                        disabled={testingDesign === design.id}
+                      >
                         <TestTube className="h-4 w-4 mr-1" />
-                        Test
+                        {testingDesign === design.id ? 'Testing...' : 'Test'}
                       </Button>
                       <Button 
                         size="sm" 

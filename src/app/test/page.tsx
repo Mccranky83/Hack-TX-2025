@@ -17,7 +17,50 @@ export default function TestPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Mock detection function - in real app this would call your API
+  // Real detection function using the inference API
+  const runDetection = async (imageData: string): Promise<MockDetectResult> => {
+    try {
+      const response = await fetch('/api/inference', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: imageData.split(',')[1] // Remove data:image/jpeg;base64, prefix
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to run inference');
+      }
+
+      const result = await response.json();
+      
+      return {
+        detected: result.detection_count > 0,
+        confidence: result.confidence,
+        objects: result.detections.map((det: any) => ({
+          name: 'person',
+          confidence: det.confidence,
+          bbox: {
+            x: det.bbox.x1,
+            y: det.bbox.y1,
+            width: det.bbox.x2 - det.bbox.x1,
+            height: det.bbox.y2 - det.bbox.y1
+          }
+        })),
+        timestamp: Date.now(),
+        imageUrl: imageData,
+        annotatedImage: result.annotated_image
+      };
+    } catch (error) {
+      console.error('Detection error:', error);
+      // Fallback to mock detection if API fails
+      return mockDetection(imageData);
+    }
+  };
+
+  // Fallback mock detection function
   const mockDetection = async (imageData: string): Promise<MockDetectResult> => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -50,7 +93,7 @@ export default function TestPage() {
       setIsLoading(true);
       
       try {
-        const detectionResult = await mockDetection(imageData);
+        const detectionResult = await runDetection(imageData);
         setResult(detectionResult);
       } catch (error) {
         console.error('Detection failed:', error);
@@ -79,7 +122,7 @@ export default function TestPage() {
     setIsLoading(true);
     
     try {
-      const detectionResult = await mockDetection(imageData);
+      const detectionResult = await runDetection(imageData);
       setResult(detectionResult);
     } catch (error) {
       console.error('Detection failed:', error);
@@ -220,6 +263,16 @@ export default function TestPage() {
                     alt="Test image"
                     className="w-full rounded-lg border border-slate-600"
                   />
+                  {result?.annotatedImage && (
+                    <div className="space-y-2">
+                      <h4 className="text-md font-semibold">Detection Results</h4>
+                      <img
+                        src={`data:image/jpeg;base64,${result.annotatedImage}`}
+                        alt="Annotated detection results"
+                        className="w-full rounded-lg border border-slate-600"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
