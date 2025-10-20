@@ -50,47 +50,25 @@ def open_camera(preferred_index=0):
             cap.release()
     return None
 
-def create_test_pattern(frame_count):
-    """Create a test pattern frame"""
-    # Create a 640x480 test pattern
-    frame = np.zeros((480, 640, 3), dtype=np.uint8)
-    
-    # Add some moving elements
-    center_x = 320 + int(100 * np.sin(frame_count * 0.1))
-    center_y = 240 + int(50 * np.cos(frame_count * 0.1))
-    
-    # Draw a moving circle
-    cv2.circle(frame, (center_x, center_y), 30, (0, 255, 0), -1)
-    
-    # Add text
-    cv2.putText(frame, f"Frame: {frame_count}", (10, 30), 
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-    cv2.putText(frame, "Test Pattern", (10, 70), 
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-    
-    # Add some noise to make it look more realistic
-    noise = np.random.randint(0, 50, frame.shape, dtype=np.uint8)
-    frame = cv2.add(frame, noise)
-    
-    return frame
 
 async def main():
-    # Get video source
-    video_source = sys.argv[1] if len(sys.argv) > 1 else None
+    # Get video source (exactly like live_patch_attack.py)
+    VIDEO_SOURCE = sys.argv[1] if len(sys.argv) > 1 else None
     
     print("Initializing video source...")
     
-    if video_source and os.path.exists(video_source):
-        cap = cv2.VideoCapture(video_source)
+    if VIDEO_SOURCE and os.path.exists(VIDEO_SOURCE):
+        cap = cv2.VideoCapture(VIDEO_SOURCE)
         if not cap.isOpened():
-            raise RuntimeError(f"Failed to open video file: {video_source}")
-        print(f"[vid] playing file: {video_source}")
+            raise RuntimeError(f"Failed to open video file: {VIDEO_SOURCE}")
+        print(f"[vid] playing file: {VIDEO_SOURCE}")
     else:
-        print("Attempting to open camera...")
         cap = open_camera(preferred_index=0)
         if cap is None:
-            print("No camera available. Creating a test pattern instead...")
-            cap = None  # We'll create a test pattern
+            raise RuntimeError(
+                "No camera opened. Close Teams/Zoom/OBS/Camera app and try again.\n"
+                "Or run with a video file:  python webrtc_demo.py path\\to\\video.mp4"
+            )
     
     # Load YOLO model
     print("Loading YOLO model...")
@@ -131,15 +109,10 @@ async def camera_loop(cap, model, server):
     
     try:
         while True:
-            if cap is not None:
-                ret, frame = cap.read()
-                if not ret:
-                    print("[warn] frame read failed; stopping.")
-                    break
-            else:
-                # Create a test pattern if no camera
-                frame = create_test_pattern(frame_count)
-                ret = True
+            ret, frame = cap.read()
+            if not ret:
+                print("[warn] frame read failed; stopping.")
+                break
             
             # Convert to RGB for processing (exactly like live_patch_attack.py)
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -166,7 +139,7 @@ async def camera_loop(cap, model, server):
                 source=np_640,
                 imgsz=IMG_SIZE,
                 conf=CONF_BASE,
-                iou=0.50,
+                iou=0.30,
                 augment=False,
                 agnostic_nms=False,
                 classes=[0],

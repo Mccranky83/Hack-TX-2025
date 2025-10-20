@@ -7,6 +7,10 @@ import logging
 import time
 from aiohttp import web, WSMsgType
 import aiohttp_cors
+from ultralytics import YOLO
+import torch
+from PIL import Image
+import torchvision.transforms as T
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +23,18 @@ class SimpleWebRTCServer:
         self.clients = set()
         self.frame_data = None
         self.inference_data = None
+        
+        # YOLO model and processing (same as live_patch_attack.py)
+        self.model = YOLO("yolov8n.pt")
+        self.img_size = 640
+        self.conf_base = 0.75  # Exactly like live_patch_attack.py
+        self.device = "cpu"
+        self.to_tensor = T.ToTensor()
+        self.resize640 = T.Resize((self.img_size, self.img_size))
+        
+    def tensor_to_uint8(self, img_t):
+        arr = (img_t.permute(1, 2, 0).clamp(0, 1).cpu().numpy() * 255).astype(np.uint8)
+        return np.ascontiguousarray(arr)
         
     async def websocket_handler(self, request):
         """Handle WebSocket connections"""
@@ -141,6 +157,7 @@ class SimpleWebRTCServer:
         # Add routes
         app.router.add_get('/ws', self.websocket_handler)
         app.router.add_get('/', self.serve_client)
+        app.router.add_post('/inference', self.handle_inference)
         
         # Add CORS to all routes
         for route in list(app.router.routes()):
@@ -155,6 +172,119 @@ class SimpleWebRTCServer:
         site = web.TCPSite(runner, self.host, self.port)
         await site.start()
         logger.info("WebRTC server started successfully")
+    
+    async def handle_inference(self, request):
+        """Handle image inference requests"""
+        try:
+            # Get JSON data with base64 image
+            data = await request.json()
+            image_b64 = data.get('image')
+            
+            if not image_b64:
+                return web.Response(
+                    text=json.dumps({"error": "No image provided"}), 
+                    status=400,
+                    content_type='application/json'
+                )
+            
+            # Decode base64 image
+            image_data = base64.b64decode(image_b64)
+            nparr = np.frombuffer(image_data, np.uint8)
+            frame_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            
+            if frame_bgr is None:
+                return web.Response(
+                    text=json.dumps({"error": "Invalid image format"}), 
+                    status=400,
+                    content_type='application/json'
+                )
+            
+            # Convert to RGB for processing (exactly like live_patch_attack.py)
+            frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+            
+            # Create a separate copy for YOLO model processing with brightness adjustments
+            model_frame_rgb = frame_rgb.copy()
+            
+            # Apply brightness adjustments only to the model processing frame
+            gray = cv2.cvtColor(model_frame_rgb, cv2.COLOR_RGB2GRAY)
+            if np.mean(gray) > 100:  # Bright lighting detected
+                # Reduce brightness and enhance contrast
+                model_frame_rgb = cv2.convertScaleAbs(model_frame_rgb, alpha=0.7, beta=-30)
+                clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+                lab = cv2.cvtColor(model_frame_rgb, cv2.COLOR_RGB2LAB)
+                lab[:,:,0] = clahe.apply(lab[:,:,0])
+                model_frame_rgb = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
+            
+            # Resize to model size (exactly like live_patch_attack.py)
+            img_t = self.to_tensor(self.resize640(Image.fromarray(model_frame_rgb))).to(self.device)
+            np_640 = self.tensor_to_uint8(img_t)
+            
+            # Run YOLO inference (exactly like live_patch_attack.py MODE_NONE)
+            res = self.model.predict(
+                source=np_640,
+                imgsz=self.img_size,
+                conf=self.conf_base,  # 0.65
+                iou=0.30,  # iou_nms for MODE_NONE
+                augment=False,  # use_tta for MODE_NONE
+                agnostic_nms=False,  # agn_nms for MODE_NONE
+                classes=[0],
+                device=self.device,
+                verbose=False
+            )[0]
+            
+            # Process results
+            detections = []
+            if res.boxes is not None and len(res.boxes) > 0:
+                for box in res.boxes:
+                    detections.append({
+                        "confidence": float(box.conf.item()),
+                        "bbox": {
+                            "x1": float(box.xyxy[0][0].item()),
+                            "y1": float(box.xyxy[0][1].item()),
+                            "x2": float(box.xyxy[0][2].item()),
+                            "y2": float(box.xyxy[0][3].item())
+                        }
+                    })
+            
+            # Calculate average confidence
+            avg_confidence = np.mean([d["confidence"] for d in detections]) if detections else 0.0
+            
+            # Draw results on the original RGB frame
+            frame_rgb_640 = cv2.resize(frame_rgb, (self.img_size, self.img_size))
+            vis = res.plot(img=frame_rgb_640)
+            
+            # Resize back to original resolution
+            original_height, original_width = frame_rgb.shape[:2]
+            vis_resized = cv2.resize(vis, (original_width, original_height))
+            
+            # Convert to BGR for encoding
+            vis_bgr = cv2.cvtColor(vis_resized, cv2.COLOR_RGB2BGR)
+            
+            # Encode as JPEG and convert to base64
+            encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 85]
+            _, buffer = cv2.imencode('.jpg', vis_bgr, encode_param)
+            frame_b64 = base64.b64encode(buffer).decode('utf-8')
+            
+            # Return results
+            return web.Response(
+                text=json.dumps({
+                    "success": True,
+                    "detections": detections,
+                    "confidence": avg_confidence,
+                    "detection_count": len(detections),
+                    "annotated_image": frame_b64,
+                    "format": "jpeg"
+                }),
+                content_type='application/json'
+            )
+            
+        except Exception as e:
+            logger.error(f"Error in inference: {e}")
+            return web.Response(
+                text=json.dumps({"error": str(e)}), 
+                status=500,
+                content_type='application/json'
+            )
     
     async def serve_client(self, request):
         """Serve the test client HTML page"""
