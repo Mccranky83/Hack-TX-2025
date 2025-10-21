@@ -1,0 +1,10 @@
+# YOLO Object Detection Dependencies
+# Use pre-built wheels to avoid compilation issues with spaces in path
+ultralytics>=8.0.0
+opencv-python>=4.8.0
+aiohttp>=3.8.0
+aiohttp-cors>=0.7.0
+torch>=2.0.0
+torchvision>=0.15.0
+pillow>=9.0.0
+numpy==2.3.4

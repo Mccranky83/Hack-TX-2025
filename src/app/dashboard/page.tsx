@@ -10,6 +10,9 @@ import { SavedDesign } from "@/types";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import DesignPreview from "@/components/DesignPreview";
 import DesignZoomModal from "@/components/DesignZoomModal";
+import CartButton from "@/components/CartButton";
+import CartDrawer from "@/components/CartDrawer";
+import OrderModal from "@/components/OrderModal";
 
 // Typing animation component with highlighted word
 function TypingAnimation({ text, className = "" }: { text: string; className?: string }) {
@@ -59,6 +62,10 @@ export default function DashboardPage() {
   // Zoom modal state
   const [showZoomModal, setShowZoomModal] = useState(false);
   const [selectedDesign, setSelectedDesign] = useState<SavedDesign | null>(null);
+  
+  // Order modal state
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [designToOrder, setDesignToOrder] = useState<SavedDesign | null>(null);
 
   // Test functionality state
   const [testingDesign, setTestingDesign] = useState<string | null>(null);
@@ -109,6 +116,18 @@ export default function DashboardPage() {
   const closeZoomModal = () => {
     setShowZoomModal(false);
     setSelectedDesign(null);
+  };
+
+  // Open order modal
+  const openOrderModal = (design: SavedDesign) => {
+    setDesignToOrder(design);
+    setShowOrderModal(true);
+  };
+
+  // Close order modal
+  const closeOrderModal = () => {
+    setShowOrderModal(false);
+    setDesignToOrder(null);
   };
 
   // Test design function
@@ -321,6 +340,7 @@ export default function DashboardPage() {
              <span className="text-2xl font-bold text-slate-100 font-mono">404 Apparel</span>
           </div>
           <div className="flex items-center space-x-4">
+            <CartButton />
             <Link href="/settings">
               <Button variant="outline" className="text-slate-100 border-slate-500 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
                 <Settings className="mr-2 h-4 w-4" />
@@ -495,7 +515,12 @@ export default function DashboardPage() {
                         <TestTube className="h-4 w-4 mr-1" />
                         {testingDesign === design.id ? 'Testing...' : 'Test'}
                       </Button>
-                      <Button size="sm" variant="outline" className="flex-1 border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => openOrderModal(design)}
+                        className="flex-1 border-slate-500 text-slate-100 bg-slate-800/50 hover:bg-slate-700 hover:text-slate-100 hover:border-slate-400 cursor-pointer"
+                      >
                         <ShoppingBag className="h-4 w-4 mr-1" />
                         Order
                       </Button>
@@ -601,6 +626,17 @@ export default function DashboardPage() {
           onClose={closeZoomModal}
         />
       )}
+
+      {/* Order Modal */}
+      {designToOrder && (
+        <OrderModal
+          design={designToOrder}
+          isOpen={showOrderModal}
+          onClose={closeOrderModal}
+        />
+      )}
+
+      {/* Cart Drawer - will be controlled by CartButton */}
     </div>
   );
 }

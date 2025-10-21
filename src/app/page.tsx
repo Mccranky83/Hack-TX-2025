@@ -104,10 +104,12 @@ function TypingAnimation({ className = "" }: { className?: string }) {
 // Professional Image carousel component with controls
 function ImageCarousel() {
   const images = [
-    { src: "/picture2.png", alt: "AI-Confusing Pattern - Rotation 1", rotation: 0 },
-    { src: "/picture2.png", alt: "AI-Confusing Pattern - Rotation 2", rotation: 90 },
-    { src: "/picture2.png", alt: "AI-Confusing Pattern - Rotation 3", rotation: 180 },
-    { src: "/picture2.png", alt: "AI-Confusing Pattern - Rotation 4", rotation: 270 }
+    { src: "/picture1.png", alt: "AI-Confusing Pattern 1", rotation: 0 },
+    { src: "/picture2.png", alt: "AI-Confusing Pattern 2", rotation: 0 },
+    { src: "/picture3.png", alt: "AI-Confusing Pattern 3", rotation: 0 },
+    { src: "/picture2.png", alt: "AI-Confusing Pattern - Rotation 1", rotation: 90 },
+    { src: "/picture2.png", alt: "AI-Confusing Pattern - Rotation 2", rotation: 180 },
+    { src: "/picture2.png", alt: "AI-Confusing Pattern - Rotation 3", rotation: 270 }
   ];
   
   const [currentIndex, setCurrentIndex] = useState(0);
